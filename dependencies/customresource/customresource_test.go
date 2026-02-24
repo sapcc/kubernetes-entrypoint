@@ -198,6 +198,138 @@ func TestIsResolved(t *testing.T) {
 			clientErr: nil,
 		},
 		{
+			name: "DotNotationNumericValue",
+			customResource: &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "stable.example.com/v1",
+					"kind":       "Foo",
+					"name":       "my-foo",
+					"namespace":  "default",
+					"replicas":   int64(3),
+				},
+			},
+			resolver: Resolver{
+				APIVersion: "stable.exmaple.com/v1",
+				Kind:       "Foo",
+				Name:       "my-foo",
+				Fields: []Field{
+					{
+						Key:   "replicas",
+						Value: "3",
+					},
+				},
+			},
+			expected:  true,
+			expectErr: false,
+			clientErr: nil,
+		},
+		{
+			name: "DotNotationBooleanValue",
+			customResource: &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "stable.example.com/v1",
+					"kind":       "Foo",
+					"name":       "my-foo",
+					"namespace":  "default",
+					"enabled":    true,
+				},
+			},
+			resolver: Resolver{
+				APIVersion: "stable.exmaple.com/v1",
+				Kind:       "Foo",
+				Name:       "my-foo",
+				Fields: []Field{
+					{
+						Key:   "enabled",
+						Value: "true",
+					},
+				},
+			},
+			expected:  true,
+			expectErr: false,
+			clientErr: nil,
+		},
+		{
+			name: "DotNotationNullValue",
+			customResource: &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "stable.example.com/v1",
+					"kind":       "Foo",
+					"name":       "my-foo",
+					"namespace":  "default",
+					"status":     nil,
+				},
+			},
+			resolver: Resolver{
+				APIVersion: "stable.exmaple.com/v1",
+				Kind:       "Foo",
+				Name:       "my-foo",
+				Fields: []Field{
+					{
+						Key:   "status",
+						Value: "null",
+					},
+				},
+			},
+			expected:  true,
+			expectErr: false,
+			clientErr: nil,
+		},
+		{
+			name: "DotNotationNestedNumeric",
+			customResource: &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "stable.example.com/v1",
+					"kind":       "Foo",
+					"name":       "my-foo",
+					"namespace":  "default",
+					"spec": map[string]interface{}{
+						"replicas": int64(5),
+					},
+				},
+			},
+			resolver: Resolver{
+				APIVersion: "stable.exmaple.com/v1",
+				Kind:       "Foo",
+				Name:       "my-foo",
+				Fields: []Field{
+					{
+						Key:   "spec.replicas",
+						Value: "5",
+					},
+				},
+			},
+			expected:  true,
+			expectErr: false,
+			clientErr: nil,
+		},
+		{
+			name: "DotNotationFloatValue",
+			customResource: &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "stable.example.com/v1",
+					"kind":       "Foo",
+					"name":       "my-foo",
+					"namespace":  "default",
+					"version":    2.5,
+				},
+			},
+			resolver: Resolver{
+				APIVersion: "stable.exmaple.com/v1",
+				Kind:       "Foo",
+				Name:       "my-foo",
+				Fields: []Field{
+					{
+						Key:   "version",
+						Value: "2.5",
+					},
+				},
+			},
+			expected:  true,
+			expectErr: false,
+			clientErr: nil,
+		},
+		{
 			name: "Unresolved",
 			customResource: &unstructured.Unstructured{
 				Object: map[string]interface{}{
