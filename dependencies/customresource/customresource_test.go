@@ -330,6 +330,423 @@ func TestIsResolved(t *testing.T) {
 			clientErr: nil,
 		},
 		{
+			name: "JSONPathSimple",
+			customResource: &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "stable.example.com/v1",
+					"kind":       "Foo",
+					"name":       "my-foo",
+					"namespace":  "default",
+					"status":     "ready",
+				},
+			},
+			resolver: Resolver{
+				APIVersion: "stable.exmaple.com/v1",
+				Kind:       "Foo",
+				Name:       "my-foo",
+				Fields: []Field{
+					{
+						Key:   "$.status",
+						Value: "ready",
+					},
+				},
+			},
+			expected:  true,
+			expectErr: false,
+			clientErr: nil,
+		},
+		{
+			name: "JSONPathNested",
+			customResource: &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "stable.example.com/v1",
+					"kind":       "Foo",
+					"name":       "my-foo",
+					"namespace":  "default",
+					"spec": map[string]interface{}{
+						"template": map[string]interface{}{
+							"status": "ready",
+						},
+					},
+				},
+			},
+			resolver: Resolver{
+				APIVersion: "stable.exmaple.com/v1",
+				Kind:       "Foo",
+				Name:       "my-foo",
+				Fields: []Field{
+					{
+						Key:   "$.spec.template.status",
+						Value: "ready",
+					},
+				},
+			},
+			expected:  true,
+			expectErr: false,
+			clientErr: nil,
+		},
+		{
+			name: "JSONPathNumericValue",
+			customResource: &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "stable.example.com/v1",
+					"kind":       "Foo",
+					"name":       "my-foo",
+					"namespace":  "default",
+					"replicas":   int64(3),
+				},
+			},
+			resolver: Resolver{
+				APIVersion: "stable.exmaple.com/v1",
+				Kind:       "Foo",
+				Name:       "my-foo",
+				Fields: []Field{
+					{
+						Key:   "$.replicas",
+						Value: "3",
+					},
+				},
+			},
+			expected:  true,
+			expectErr: false,
+			clientErr: nil,
+		},
+		{
+			name: "JSONPathBooleanValue",
+			customResource: &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "stable.example.com/v1",
+					"kind":       "Foo",
+					"name":       "my-foo",
+					"namespace":  "default",
+					"enabled":    true,
+				},
+			},
+			resolver: Resolver{
+				APIVersion: "stable.exmaple.com/v1",
+				Kind:       "Foo",
+				Name:       "my-foo",
+				Fields: []Field{
+					{
+						Key:   "$.enabled",
+						Value: "true",
+					},
+				},
+			},
+			expected:  true,
+			expectErr: false,
+			clientErr: nil,
+		},
+		{
+			name: "JSONPathArrayIndexing",
+			customResource: &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "stable.example.com/v1",
+					"kind":       "Foo",
+					"name":       "my-foo",
+					"namespace":  "default",
+					"items": []interface{}{
+						map[string]interface{}{
+							"status": "ready",
+						},
+						map[string]interface{}{
+							"status": "pending",
+						},
+					},
+				},
+			},
+			resolver: Resolver{
+				APIVersion: "stable.exmaple.com/v1",
+				Kind:       "Foo",
+				Name:       "my-foo",
+				Fields: []Field{
+					{
+						Key:   "$.items[0].status",
+						Value: "ready",
+					},
+				},
+			},
+			expected:  true,
+			expectErr: false,
+			clientErr: nil,
+		},
+		{
+			name: "JSONPathMixedWithDotNotation",
+			customResource: &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "stable.example.com/v1",
+					"kind":       "Foo",
+					"name":       "my-foo",
+					"namespace":  "default",
+					"status":     "ready",
+					"simpleKey":  "active",
+				},
+			},
+			resolver: Resolver{
+				APIVersion: "stable.exmaple.com/v1",
+				Kind:       "Foo",
+				Name:       "my-foo",
+				Fields: []Field{
+					{
+						Key:   "$.status",
+						Value: "ready",
+					},
+					{
+						Key:   "simpleKey",
+						Value: "active",
+					},
+				},
+			},
+			expected:  true,
+			expectErr: false,
+			clientErr: nil,
+		},
+		{
+			name: "JSONPathInvalidSyntax",
+			customResource: &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "stable.example.com/v1",
+					"kind":       "Foo",
+					"name":       "my-foo",
+					"namespace":  "default",
+					"status":     "ready",
+				},
+			},
+			resolver: Resolver{
+				APIVersion: "stable.exmaple.com/v1",
+				Kind:       "Foo",
+				Name:       "my-foo",
+				Fields: []Field{
+					{
+						Key:   "$.[invalid",
+						Value: "ready",
+					},
+				},
+			},
+			expected:  false,
+			expectErr: true,
+			clientErr: nil,
+		},
+		{
+			name: "JSONPathNoResults",
+			customResource: &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "stable.example.com/v1",
+					"kind":       "Foo",
+					"name":       "my-foo",
+					"namespace":  "default",
+				},
+			},
+			resolver: Resolver{
+				APIVersion: "stable.exmaple.com/v1",
+				Kind:       "Foo",
+				Name:       "my-foo",
+				Fields: []Field{
+					{
+						Key:   "$.nonexistent",
+						Value: "ready",
+					},
+				},
+			},
+			expected:  false,
+			expectErr: true,
+			clientErr: nil,
+		},
+		{
+			name: "JSONPathMultipleResults",
+			customResource: &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "stable.example.com/v1",
+					"kind":       "Foo",
+					"name":       "my-foo",
+					"namespace":  "default",
+					"items": []interface{}{
+						map[string]interface{}{
+							"status": "ready",
+						},
+						map[string]interface{}{
+							"status": "pending",
+						},
+					},
+				},
+			},
+			resolver: Resolver{
+				APIVersion: "stable.exmaple.com/v1",
+				Kind:       "Foo",
+				Name:       "my-foo",
+				Fields: []Field{
+					{
+						Key:   "$.items[*].status",
+						Value: "ready",
+					},
+				},
+			},
+			expected:  false,
+			expectErr: true,
+			clientErr: nil,
+		},
+		{
+			name: "JSONPathNonPrimitiveObject",
+			customResource: &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "stable.example.com/v1",
+					"kind":       "Foo",
+					"name":       "my-foo",
+					"namespace":  "default",
+					"complex": map[string]interface{}{
+						"nested": "value",
+					},
+				},
+			},
+			resolver: Resolver{
+				APIVersion: "stable.exmaple.com/v1",
+				Kind:       "Foo",
+				Name:       "my-foo",
+				Fields: []Field{
+					{
+						Key:   "$.complex",
+						Value: "value",
+					},
+				},
+			},
+			expected:  false,
+			expectErr: true,
+			clientErr: nil,
+		},
+		{
+			name: "JSONPathNonPrimitiveArray",
+			customResource: &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "stable.example.com/v1",
+					"kind":       "Foo",
+					"name":       "my-foo",
+					"namespace":  "default",
+					"items": []interface{}{
+						"item1",
+						"item2",
+					},
+				},
+			},
+			resolver: Resolver{
+				APIVersion: "stable.exmaple.com/v1",
+				Kind:       "Foo",
+				Name:       "my-foo",
+				Fields: []Field{
+					{
+						Key:   "$.items",
+						Value: "item1",
+					},
+				},
+			},
+			expected:  false,
+			expectErr: true,
+			clientErr: nil,
+		},
+		{
+			name: "JSONPathValueMismatch",
+			customResource: &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "stable.example.com/v1",
+					"kind":       "Foo",
+					"name":       "my-foo",
+					"namespace":  "default",
+					"status":     "pending",
+				},
+			},
+			resolver: Resolver{
+				APIVersion: "stable.exmaple.com/v1",
+				Kind:       "Foo",
+				Name:       "my-foo",
+				Fields: []Field{
+					{
+						Key:   "$.status",
+						Value: "ready",
+					},
+				},
+			},
+			expected:  false,
+			expectErr: true,
+			clientErr: nil,
+		},
+		{
+			name: "JSONPathFloatValue",
+			customResource: &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "stable.example.com/v1",
+					"kind":       "Foo",
+					"name":       "my-foo",
+					"namespace":  "default",
+					"version":    3.14,
+				},
+			},
+			resolver: Resolver{
+				APIVersion: "stable.exmaple.com/v1",
+				Kind:       "Foo",
+				Name:       "my-foo",
+				Fields: []Field{
+					{
+						Key:   "$.version",
+						Value: "3.14",
+					},
+				},
+			},
+			expected:  true,
+			expectErr: false,
+			clientErr: nil,
+		},
+		{
+			name: "JSONPathNullValue",
+			customResource: &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "stable.example.com/v1",
+					"kind":       "Foo",
+					"name":       "my-foo",
+					"namespace":  "default",
+					"status":     nil,
+				},
+			},
+			resolver: Resolver{
+				APIVersion: "stable.exmaple.com/v1",
+				Kind:       "Foo",
+				Name:       "my-foo",
+				Fields: []Field{
+					{
+						Key:   "$.status",
+						Value: "null",
+					},
+				},
+			},
+			expected:  true,
+			expectErr: false,
+			clientErr: nil,
+		},
+		{
+			name: "JSONPathWithCurlyBraces",
+			customResource: &unstructured.Unstructured{
+				Object: map[string]interface{}{
+					"apiVersion": "stable.example.com/v1",
+					"kind":       "Foo",
+					"name":       "my-foo",
+					"namespace":  "default",
+					"status":     "ready",
+				},
+			},
+			resolver: Resolver{
+				APIVersion: "stable.exmaple.com/v1",
+				Kind:       "Foo",
+				Name:       "my-foo",
+				Fields: []Field{
+					{
+						Key:   "{.status}",
+						Value: "ready",
+					},
+				},
+			},
+			expected:  true,
+			expectErr: false,
+			clientErr: nil,
+		},
+		{
 			name: "Unresolved",
 			customResource: &unstructured.Unstructured{
 				Object: map[string]interface{}{
