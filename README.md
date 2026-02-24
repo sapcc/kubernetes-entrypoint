@@ -100,6 +100,21 @@ matches a desired value. The environment variable `DEPENDENCY_CUSTOM_RESOURCE`
 dictates the specific object to watch, as well as the key and its desired
 value.
 
+The `key` field supports three formats:
+1. **Dot notation** (e.g., `spec.arbitrary-key`) - for simple nested field access
+2. **JSONPath with $ prefix** (e.g., `$.spec.arbitrary-key` or `$.items[0].status`) - for more complex queries including array indexing
+3. **JSONPath with curly braces** (e.g., `{.spec.arbitrary-key}` or `{$.items[0].status}`) - alternative JSONPath syntax
+
+**Important JSONPath restrictions:**
+- Only single-value results are allowed (queries returning multiple values will fail)
+
+**Value Comparison:**
+- Values are compared using JSON encoding for consistency
+- String values should be provided without quotes in the configuration (e.g., `"value": "ready"` not `"value": "\"ready\""`)
+- Numeric values are compared as JSON-encoded numbers (e.g., `"value": "3.14"` for a float, `"value": "3"` for an integer)
+- Boolean values should be provided as strings (e.g., `"value": "true"` or `"value": "false"`)
+- `null` values are supported - use `"value": "null"` to match a null field
+
 For example, suppose you have the following `DEPENDENCY_CUSTOM_RESOURCE` and CustomResource:
 `DEPENDENCY_CUSTOM_RESOURCE='[{"apiVersion":"stable.example.com/v1","kind":"Foo","namespace":"default","name":"my-foo","fields":[{"key":"spec.arbitrary-key","value":"ready"}]}]'`
 ```
@@ -114,7 +129,25 @@ spec:
 Given the above, kubernetes-entrypoint will wait until the value of
 `spec.arbitrary-key` has flipped from `not-ready` to `ready`.
 
-Note also that `fields` is a list, meaning that multiple fields can be monitered.
+**JSONPath Examples:**
+```
+# Simple field access
+{"key": "$.status", "value": "ready"}
+
+# Nested field access
+{"key": "$.spec.template.status", "value": "ready"}
+
+# Array indexing
+{"key": "$.items[0].status", "value": "ready"}
+
+# Numeric comparison
+{"key": "$.spec.replicas", "value": "3"}
+
+# Boolean comparison
+{"key": "$.spec.enabled", "value": "true"}
+```
+
+Note also that `fields` is a list, meaning that multiple fields can be monitored.
 
 ## Image
 
