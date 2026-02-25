@@ -17,12 +17,10 @@ RUN make ${MAKE_TARGET}
 
 FROM ${FROM} AS release
 
-LABEL org.opencontainers.image.authors='airship-discuss@lists.airshipit.org, irc://#airshipit@freenode' \
-      org.opencontainers.image.url='https://airshipit.org' \
-      org.opencontainers.image.documentation='https://docs.airshipit.org/kubernetes-entrypoint' \
-      org.opencontainers.image.source='https://opendev.org/airship/kubernetes-entrypoint' \
-      org.opencontainers.image.vendor='The Airship Authors' \
-      org.opencontainers.image.licenses='Apache-2.0'
+LABEL org.opencontainers.image.url='https://github.com/sapcc/kubernetes-entrypoint' \
+      org.opencontainers.image.source='https://github.com/sapcc/kubernetes-entrypoint' \
+      org.opencontainers.image.licenses='Apache-2.0' \
+      source_repository='https://github.com/sapcc/kubernetes-entrypoint'
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
