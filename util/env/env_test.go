@@ -15,8 +15,7 @@ const (
 )
 
 func TestSplitEnvToListWithComma(t *testing.T) {
-	defer os.Unsetenv("TEST_LIST")
-	os.Setenv("TEST_LIST", name1+","+name2)
+	t.Setenv("TEST_LIST", name1+","+name2)
 	list := SplitEnvToDeps("TEST_LIST")
 	if len(list) != 2 {
 		t.Errorf("Expected len to be 2 not %d", len(list))
@@ -30,8 +29,7 @@ func TestSplitEnvToListWithComma(t *testing.T) {
 }
 
 func TestSplitEnvToList(t *testing.T) {
-	defer os.Unsetenv("TEST_LIST")
-	os.Setenv("TEST_LIST", name1)
+	t.Setenv("TEST_LIST", name1)
 	list := SplitEnvToDeps("TEST_LIST")
 	if len(list) != 1 {
 		t.Errorf("Expected len to be 1 not %d", len(list))
@@ -45,8 +43,7 @@ func TestSplitEnvToList(t *testing.T) {
 }
 
 func TestSplitEnvToListWithColon(t *testing.T) {
-	defer os.Unsetenv("TEST_LIST")
-	os.Setenv("TEST_LIST", altNamespace1+":"+name1)
+	t.Setenv("TEST_LIST", altNamespace1+":"+name1)
 	list := SplitEnvToDeps("TEST_LIST")
 	if len(list) != 1 {
 		t.Errorf("Expected len to be 1 not %d", len(list))
@@ -61,8 +58,7 @@ func TestSplitEnvToListWithColon(t *testing.T) {
 
 func TestSplitEnvToListWithTooManyColons(t *testing.T) {
 	// TODO(howell): This should probably expect an error
-	defer os.Unsetenv("TEST_LIST")
-	os.Setenv("TEST_LIST", "too:many:colons")
+	t.Setenv("TEST_LIST", "too:many:colons")
 	list := SplitEnvToDeps("TEST_LIST")
 	if len(list) != 0 {
 		t.Errorf("Expected list to be empty")
@@ -70,8 +66,7 @@ func TestSplitEnvToListWithTooManyColons(t *testing.T) {
 }
 
 func TestSplitEnvToListWithColonsAndCommas(t *testing.T) {
-	defer os.Unsetenv("TEST_LIST")
-	os.Setenv("TEST_LIST", altNamespace1+":"+name1+","+altNamespace2+":"+name2)
+	t.Setenv("TEST_LIST", altNamespace1+":"+name1+","+altNamespace2+":"+name2)
 	list := SplitEnvToDeps("TEST_LIST")
 	if len(list) != 2 {
 		t.Errorf("Expected len to be 2 not %d", len(list))
@@ -91,8 +86,7 @@ func TestSplitEnvToListWithColonsAndCommas(t *testing.T) {
 }
 
 func TestSplitEnvToListWithMissingNamespace(t *testing.T) {
-	defer os.Unsetenv("TEST_LIST")
-	os.Setenv("TEST_LIST", ":name")
+	t.Setenv("TEST_LIST", ":name")
 	list := SplitEnvToDeps("TEST_LIST")
 	if len(list) != 0 {
 		t.Errorf("Invalid format, missing namespace in pod")
@@ -100,8 +94,7 @@ func TestSplitEnvToListWithMissingNamespace(t *testing.T) {
 }
 
 func TestSplitEmptyEnvWithColon(t *testing.T) {
-	defer os.Unsetenv("TEST_LIST")
-	os.Setenv("TEST_LIST", "")
+	t.Setenv("TEST_LIST", "")
 	list := SplitEnvToDeps("TEST_LIST")
 	if len(list) != 0 {
 		t.Errorf("Expected list to be empty")
@@ -125,8 +118,8 @@ func TestSplitPodEnvToDepsSuccess(t *testing.T) {
      }
   }
 ]`
-	os.Setenv("NAMESPACE", "TEST_NAMESPACE")
-	os.Setenv("TEST_LIST_JSON", testListJSONVal)
+	t.Setenv("NAMESPACE", "TEST_NAMESPACE")
+	t.Setenv("TEST_LIST_JSON", testListJSONVal)
 	actual := SplitPodEnvToDeps("TEST_LIST_JSON")
 	expected := []PodDependency{
 		{
@@ -153,8 +146,7 @@ func TestSplitPodEnvToDepsSuccess(t *testing.T) {
 }
 
 func TestSplitPodEnvToDepsUnset(t *testing.T) {
-	defer os.Unsetenv("TEST_LIST")
-	os.Setenv("TEST_LIST", "")
+	t.Setenv("TEST_LIST", "")
 	actual := SplitPodEnvToDeps("TEST_LIST")
 	if len(actual) != 0 {
 		t.Errorf("Expected: no dependencies Got: %v", actual)
@@ -162,8 +154,7 @@ func TestSplitPodEnvToDepsUnset(t *testing.T) {
 }
 
 func TestSplitPodEnvToDepsIgnoreInvalid(t *testing.T) {
-	defer os.Unsetenv("TEST_LIST")
-	os.Setenv("TEST_LIST", `[{"invalid": json}`)
+	t.Setenv("TEST_LIST", `[{"invalid": json}`)
 	actual := SplitPodEnvToDeps("TEST_LIST")
 	if len(actual) != 0 {
 		t.Errorf("Expected: ignore invalid dependencies Got: %v", actual)
@@ -183,10 +174,8 @@ func TestSplitJobEnvToDepsJsonSuccess(t *testing.T) {
     "name": "` + name1 + `"
   }
 ]`
-	defer os.Unsetenv("NAMESPACE")
-	os.Setenv("NAMESPACE", "TEST_NAMESPACE")
-	defer os.Unsetenv("TEST_LIST_JSON")
-	os.Setenv("TEST_LIST_JSON", testListJSONVal)
+	t.Setenv("NAMESPACE", "TEST_NAMESPACE")
+	t.Setenv("TEST_LIST_JSON", testListJSONVal)
 	actual := SplitJobEnvToDeps("TEST_LIST", "TEST_LIST_JSON")
 	expected := []JobDependency{
 		{
@@ -208,10 +197,8 @@ func TestSplitJobEnvToDepsJsonSuccess(t *testing.T) {
 }
 
 func TestSplitJobEnvToDepsPlainSuccess(t *testing.T) {
-	defer os.Unsetenv("NAMESPACE")
-	os.Setenv("NAMESPACE", "TEST_NAMESPACE")
-	defer os.Unsetenv("TEST_LIST")
-	os.Setenv("TEST_LIST", "plain")
+	t.Setenv("NAMESPACE", "TEST_NAMESPACE")
+	t.Setenv("TEST_LIST", "plain")
 	actual := SplitJobEnvToDeps("TEST_LIST", "TEST_LIST_JSON")
 	expected := []JobDependency{
 		{
@@ -225,12 +212,9 @@ func TestSplitJobEnvToDepsPlainSuccess(t *testing.T) {
 }
 
 func TestSplitJobEnvToDepsJsonPrecedence(t *testing.T) {
-	defer os.Unsetenv("NAMESPACE")
-	os.Setenv("NAMESPACE", "TEST_NAMESPACE")
-	defer os.Unsetenv("TEST_LIST_JSON")
-	os.Setenv("TEST_LIST_JSON", `[{"name": "json"}]`)
-	defer os.Unsetenv("TEST_LIST")
-	os.Setenv("TEST_LIST", "plain")
+	t.Setenv("NAMESPACE", "TEST_NAMESPACE")
+	t.Setenv("TEST_LIST_JSON", `[{"name": "json"}]`)
+	t.Setenv("TEST_LIST", "plain")
 	actual := SplitJobEnvToDeps("TEST_LIST", "TEST_LIST_JSON")
 	expected := []JobDependency{
 		{
@@ -251,8 +235,7 @@ func TestSplitJobEnvToDepsUnset(t *testing.T) {
 }
 
 func TestSplitJobEnvToDepsIgnoreInvalid(t *testing.T) {
-	defer os.Unsetenv("TEST_LIST_JSON")
-	os.Setenv("TEST_LIST_JSON", `[{"invalid": json}`)
+	t.Setenv("TEST_LIST_JSON", `[{"invalid": json}`)
 	actual := SplitJobEnvToDeps("TEST_LIST", "TEST_LIST_JSON")
 	if len(actual) != 0 {
 		t.Errorf("Expected: ignore invalid dependencies Got: %v", actual)
@@ -268,8 +251,7 @@ func TestSplitCommandUnset(t *testing.T) {
 }
 
 func TestSplitCommandEmpty(t *testing.T) {
-	defer os.Unsetenv("COMMAND")
-	os.Setenv("COMMAND", "")
+	t.Setenv("COMMAND", "")
 	list := SplitCommand()
 	if len(list) > 0 {
 		t.Errorf("Expected len to be 0, got %v", len(list))
@@ -277,8 +259,7 @@ func TestSplitCommandEmpty(t *testing.T) {
 }
 
 func TestSplitCommand(t *testing.T) {
-	defer os.Unsetenv("COMMAND")
-	os.Setenv("COMMAND", "echo test")
+	t.Setenv("COMMAND", "echo test")
 	list := SplitCommand()
 	if len(list) != 2 {
 		t.Errorf("Expected two elements, got %v", len(list))
@@ -292,8 +273,7 @@ func TestSplitCommand(t *testing.T) {
 }
 
 func TestGetBaseNamespaceEmpty(t *testing.T) {
-	defer os.Unsetenv("NAMESPACE")
-	os.Setenv("NAMESPACE", "")
+	t.Setenv("NAMESPACE", "")
 	getBaseNamespace := GetBaseNamespace()
 	if getBaseNamespace != defaultNamespace {
 		t.Errorf("Expected namespace to be %s, got %s", defaultNamespace, getBaseNamespace)
@@ -301,8 +281,7 @@ func TestGetBaseNamespaceEmpty(t *testing.T) {
 }
 
 func TestGetBaseNamespace(t *testing.T) {
-	defer os.Unsetenv("NAMESPACE")
-	os.Setenv("NAMESPACE", "foo")
+	t.Setenv("NAMESPACE", "foo")
 	getBaseNamespace := GetBaseNamespace()
 	if getBaseNamespace != "foo" {
 		t.Errorf("Expected namespace to be foo, got %v", getBaseNamespace)
