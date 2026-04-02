@@ -3,7 +3,6 @@ package container
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"strings"
 
@@ -25,7 +24,7 @@ type Container struct {
 }
 
 func init() {
-	containerEnv := fmt.Sprintf("%sCONTAINER", entry.DependencyPrefix)
+	containerEnv := entry.DependencyPrefix + "CONTAINER"
 	if util.ContainsSeparator(containerEnv, "Container") {
 		logger.Error.Print(NamespaceNotSupported)
 		os.Exit(1)
@@ -54,7 +53,7 @@ func (c Container) IsResolved(ctx context.Context, entrypoint entry.EntrypointIn
 	}
 
 	if strings.Contains(c.name, env.Separator) {
-		return false, fmt.Errorf("specifying namespace is not permitted")
+		return false, errors.New("specifying namespace is not permitted")
 	}
 	containers := pod.Status.ContainerStatuses
 	for _, container := range containers {
@@ -66,5 +65,5 @@ func (c Container) IsResolved(ctx context.Context, entrypoint entry.EntrypointIn
 }
 
 func (c Container) String() string {
-	return fmt.Sprintf("Container %s", c.name)
+	return "Container " + c.name
 }
