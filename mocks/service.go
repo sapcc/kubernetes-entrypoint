@@ -3,7 +3,6 @@ package mocks
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,7 +28,7 @@ func (s sClient) Create(
 	opts metav1.CreateOptions,
 ) (*v1.Service, error) {
 
-	return nil, fmt.Errorf("not implemented")
+	return nil, errors.New("not implemented")
 }
 
 func (s sClient) Update(
@@ -38,7 +37,7 @@ func (s sClient) Update(
 	opts metav1.UpdateOptions,
 ) (*v1.Service, error) {
 
-	return nil, fmt.Errorf("not implemented")
+	return nil, errors.New("not implemented")
 }
 
 func (s sClient) UpdateStatus(
@@ -47,11 +46,11 @@ func (s sClient) UpdateStatus(
 	opts metav1.UpdateOptions,
 ) (*v1.Service, error) {
 
-	return nil, fmt.Errorf("not implemented")
+	return nil, errors.New("not implemented")
 }
 
 func (s sClient) Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error {
-	return fmt.Errorf("not implemented")
+	return errors.New("not implemented")
 }
 
 func (s sClient) Get(
@@ -69,11 +68,11 @@ func (s sClient) Get(
 }
 
 func (s sClient) List(ctx context.Context, opts metav1.ListOptions) (*v1.ServiceList, error) {
-	return nil, fmt.Errorf("not implemented")
+	return nil, errors.New("not implemented")
 }
 
 func (s sClient) Watch(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error) {
-	return nil, fmt.Errorf("not implemented")
+	return nil, errors.New("not implemented")
 }
 
 func (s sClient) Patch(
@@ -85,7 +84,7 @@ func (s sClient) Patch(
 	subresources ...string,
 ) (result *v1.Service, err error) {
 
-	return nil, fmt.Errorf("not implemented")
+	return nil, errors.New("not implemented")
 }
 
 func (s sClient) Apply(
@@ -94,7 +93,7 @@ func (s sClient) Apply(
 	opts metav1.ApplyOptions,
 ) (result *v1.Service, err error) {
 
-	return nil, fmt.Errorf("not implemented")
+	return nil, errors.New("not implemented")
 }
 
 func (s sClient) ApplyStatus(
@@ -103,7 +102,7 @@ func (s sClient) ApplyStatus(
 	opts metav1.ApplyOptions,
 ) (result *v1.Service, err error) {
 
-	return nil, fmt.Errorf("not implemented")
+	return nil, errors.New("not implemented")
 }
 
 func (s sClient) ProxyGet(

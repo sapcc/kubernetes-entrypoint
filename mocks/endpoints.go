@@ -3,7 +3,6 @@ package mocks
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -25,7 +24,7 @@ func (e eClient) Create(
 	opts metav1.CreateOptions,
 ) (*v1.Endpoints, error) {
 
-	return nil, fmt.Errorf("not implemented")
+	return nil, errors.New("not implemented")
 }
 
 func (e eClient) Update(
@@ -34,7 +33,7 @@ func (e eClient) Update(
 	opts metav1.UpdateOptions,
 ) (*v1.Endpoints, error) {
 
-	return nil, fmt.Errorf("not implemented")
+	return nil, errors.New("not implemented")
 }
 
 func (e eClient) Delete(
@@ -43,7 +42,7 @@ func (e eClient) Delete(
 	opts metav1.DeleteOptions,
 ) error {
 
-	return fmt.Errorf("not implemented")
+	return errors.New("not implemented")
 }
 
 func (e eClient) DeleteCollection(
@@ -52,7 +51,7 @@ func (e eClient) DeleteCollection(
 	listOpts metav1.ListOptions,
 ) error {
 
-	return fmt.Errorf("not implemented")
+	return errors.New("not implemented")
 }
 
 func (e eClient) Get(
@@ -90,7 +89,7 @@ func (e eClient) List(
 	opts metav1.ListOptions,
 ) (*v1.EndpointsList, error) {
 
-	return nil, fmt.Errorf("not implemented")
+	return nil, errors.New("not implemented")
 }
 
 func (e eClient) Watch(
@@ -98,7 +97,7 @@ func (e eClient) Watch(
 	opts metav1.ListOptions,
 ) (watch.Interface, error) {
 
-	return nil, fmt.Errorf("not implemented")
+	return nil, errors.New("not implemented")
 }
 
 func (e eClient) Patch(
@@ -110,7 +109,7 @@ func (e eClient) Patch(
 	subresources ...string,
 ) (result *v1.Endpoints, err error) {
 
-	return nil, fmt.Errorf("not implemented")
+	return nil, errors.New("not implemented")
 }
 
 func (e eClient) Apply(
@@ -119,7 +118,7 @@ func (e eClient) Apply(
 	opts metav1.ApplyOptions,
 ) (result *v1.Endpoints, err error) {
 
-	return nil, fmt.Errorf("not implemented")
+	return nil, errors.New("not implemented")
 }
 
 func NewEClient() corev1.EndpointsInterface {
