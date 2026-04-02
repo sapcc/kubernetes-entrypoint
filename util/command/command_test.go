@@ -14,20 +14,38 @@
 
 package command
 
-import "testing"
+import (
+	"fmt"
+	"syscall"
 
-func TestExecuteCommandSuccess(t *testing.T) {
-	successCommand := []string{"echo", "test"}
-	err := Execute(successCommand)
-	if err != nil {
-		t.Errorf("Expecting: command to success not %v", err)
-	}
-}
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+)
 
-func TestExecuteCommandFail(t *testing.T) {
-	errorCommand := []string{"false"}
-	err := Execute(errorCommand)
-	if err == nil {
-		t.Errorf("Expecting command to fail")
-	}
-}
+var _ = Describe("Execute", func() {
+	AfterEach(func() {
+		// Restore the real syscall after each spec.
+		execSyscall = syscall.Exec
+	})
+
+	It("executes commands successfully", func() {
+		execSyscall = func(argv0 string, argv []string, envv []string) error {
+			return nil
+		}
+		err := Execute([]string{"echo", "test"})
+		Expect(err).NotTo(HaveOccurred())
+	})
+
+	It("returns an error when syscall.Exec fails", func() {
+		execSyscall = func(_ string, _ []string, _ []string) error {
+			return fmt.Errorf("exec failed")
+		}
+		err := Execute([]string{"echo", "test"})
+		Expect(err).To(HaveOccurred())
+	})
+
+	It("returns an error when command is not found", func() {
+		err := Execute([]string{"nonexistent_command_xyz_abc"})
+		Expect(err).To(HaveOccurred())
+	})
+})

@@ -19,7 +19,7 @@ import (
 	"context"
 	"fmt"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"opendev.org/airship/kubernetes-entrypoint/entrypoint"
