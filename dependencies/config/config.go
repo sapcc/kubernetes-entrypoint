@@ -48,7 +48,7 @@ func init() {
 	}
 }
 
-func NewConfig(name string, prefix string) (*Config, error) {
+func NewConfig(name, prefix string) (*Config, error) {
 	hostname, err := os.Hostname()
 	if err != nil {
 		return nil, fmt.Errorf("cannot determine hostname: %w", err)
@@ -95,7 +95,7 @@ func (c Config) createAndTemplateConfig() error {
 	return nil
 }
 
-func getSrcConfig(prefix string, config string) (srcConfig string) {
+func getSrcConfig(prefix, config string) (srcConfig string) {
 	return fmt.Sprintf("%s/%s/%s", prefix, config, config)
 }
 

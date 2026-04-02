@@ -37,7 +37,7 @@ func init() {
 	}
 }
 
-func NewDaemonset(name string, namespace string) (*Daemonset, error) {
+func NewDaemonset(name, namespace string) (*Daemonset, error) {
 	if os.Getenv(PodNameEnvVar) == "" {
 		return nil, fmt.Errorf(PodNameNotSetErrorFormat, name, namespace)
 	}

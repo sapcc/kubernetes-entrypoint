@@ -28,7 +28,7 @@ func init() {
 	}
 }
 
-func NewService(name string, namespace string) Service {
+func NewService(name, namespace string) Service {
 	return Service{
 		name:      name,
 		namespace: namespace,

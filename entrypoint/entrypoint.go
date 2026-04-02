@@ -46,15 +46,15 @@ func Register(res Resolver) {
 // New is a constructor for entrypoint
 func New(config *rest.Config) (entry *Entrypoint, err error) {
 	entry = new(Entrypoint)
-	client, err := client.New(config)
+	newClient, err := client.New(config)
 	if err != nil {
 		return nil, err
 	}
-	entry.client = client
+	entry.client = newClient
 	return entry, err
 }
 
-func (e Entrypoint) Client() (client client.ClientInterface) {
+func (e Entrypoint) Client() (c client.ClientInterface) {
 	return e.client
 }
 
