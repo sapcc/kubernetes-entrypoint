@@ -87,7 +87,8 @@ var _ = Describe("Entrypoint", func() {
 		defer GinkgoRecover()
 
 		// Set output logger to our reader
-		r, w, _ := os.Pipe()
+		r, w, err := os.Pipe()
+		Expect(err).NotTo(HaveOccurred())
 		tmp := os.Stdout
 		defer func() {
 			os.Stdout = tmp
@@ -106,7 +107,8 @@ var _ = Describe("Entrypoint", func() {
 		// Wait for resolver to finish
 		time.Sleep(5 * time.Second)
 
-		stdout, _ := io.ReadAll(r)
+		stdout, err := io.ReadAll(r)
+		Expect(err).NotTo(HaveOccurred())
 		resolvedString := fmt.Sprintf("%sResolving %v\n%sDependency %v is resolved.\n",
 			loggerInfoText, dummy, loggerInfoText, dummy)
 		Expect(string(stdout)).To(Equal(resolvedString))

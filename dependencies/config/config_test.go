@@ -114,8 +114,9 @@ var _ = Describe("Config", func() {
 	})
 
 	It("checks the format of a newly created config file", func() {
-		config, _ := NewConfig(testConfigPath, templatePrefix)
-		_, err := config.IsResolved(context.TODO(), testEntrypoint)
+		config, err := NewConfig(testConfigPath, templatePrefix)
+		Expect(err).NotTo(HaveOccurred())
+		_, err = config.IsResolved(context.TODO(), testEntrypoint)
 		Expect(err).NotTo(HaveOccurred())
 
 		result, err := os.ReadFile(fmt.Sprintf("%s/%s", testDir, testConfigName))
@@ -131,7 +132,8 @@ var _ = Describe("Config", func() {
 	})
 
 	It("checks resolution of a config", func() {
-		config, _ := NewConfig(testConfigPath, templatePrefix)
+		config, err := NewConfig(testConfigPath, templatePrefix)
+		Expect(err).NotTo(HaveOccurred())
 
 		isResolved, err := config.IsResolved(context.TODO(), testEntrypoint)
 
