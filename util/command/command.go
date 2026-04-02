@@ -22,6 +22,9 @@ import (
 	"opendev.org/airship/kubernetes-entrypoint/logger"
 )
 
+// execSyscall is a variable so it can be overridden in tests.
+var execSyscall = syscall.Exec
+
 func Execute(command []string) error {
 	path, err := exec.LookPath(command[0])
 	if err != nil {
@@ -30,7 +33,7 @@ func Execute(command []string) error {
 	}
 
 	env := os.Environ()
-	err = syscall.Exec(path, command, env)
+	err = execSyscall(path, command, env)
 	if err != nil {
 		logger.Error.Printf("Executing command %v failed: %v", command, err)
 		return err
