@@ -19,39 +19,41 @@ import (
 	"context"
 	"errors"
 
-	v1 "k8s.io/api/core/v1"
+	discoveryv1 "k8s.io/api/discovery/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
-	corev1applyconfigurations "k8s.io/client-go/applyconfigurations/core/v1"
-	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	discoveryv1applyconfigurations "k8s.io/client-go/applyconfigurations/discovery/v1"
+	discoveryv1client "k8s.io/client-go/kubernetes/typed/discovery/v1"
 )
 
-type eClient struct{}
+type esClient struct{}
 
 const (
 	MockEndpointError = "mock endpoint didnt work"
 )
 
-func (e eClient) Create(
+func boolPtr(b bool) *bool { return &b }
+
+func (e esClient) Create(
 	ctx context.Context,
-	endpoints *v1.Endpoints,
+	endpointSlice *discoveryv1.EndpointSlice,
 	opts metav1.CreateOptions,
-) (*v1.Endpoints, error) {
+) (*discoveryv1.EndpointSlice, error) {
 
 	return nil, errors.New("not implemented")
 }
 
-func (e eClient) Update(
+func (e esClient) Update(
 	ctx context.Context,
-	endpoints *v1.Endpoints,
+	endpointSlice *discoveryv1.EndpointSlice,
 	opts metav1.UpdateOptions,
-) (*v1.Endpoints, error) {
+) (*discoveryv1.EndpointSlice, error) {
 
 	return nil, errors.New("not implemented")
 }
 
-func (e eClient) Delete(
+func (e esClient) Delete(
 	ctx context.Context,
 	name string,
 	opts metav1.DeleteOptions,
@@ -60,7 +62,7 @@ func (e eClient) Delete(
 	return errors.New("not implemented")
 }
 
-func (e eClient) DeleteCollection(
+func (e esClient) DeleteCollection(
 	ctx context.Context,
 	opts metav1.DeleteOptions,
 	listOpts metav1.ListOptions,
@@ -69,45 +71,55 @@ func (e eClient) DeleteCollection(
 	return errors.New("not implemented")
 }
 
-func (e eClient) Get(
+func (e esClient) Get(
 	ctx context.Context,
 	name string,
 	opts metav1.GetOptions,
-) (*v1.Endpoints, error) {
+) (*discoveryv1.EndpointSlice, error) {
+
+	return nil, errors.New("not implemented")
+}
+
+func (e esClient) List(
+	ctx context.Context,
+	opts metav1.ListOptions,
+) (*discoveryv1.EndpointSliceList, error) {
+
+	// Extract service name from label selector "kubernetes.io/service-name=<name>"
+	name := opts.LabelSelector
+	if len(name) > len("kubernetes.io/service-name=") {
+		name = name[len("kubernetes.io/service-name="):]
+	}
 
 	if name == FailingServiceName {
 		return nil, errors.New(MockEndpointError)
 	}
 
-	subsets := []v1.EndpointSubset{}
+	var endpoints []discoveryv1.Endpoint
 
 	if name != EmptySubsetsServiceName {
-		subsets = []v1.EndpointSubset{
+		ready := boolPtr(true)
+		endpoints = []discoveryv1.Endpoint{
 			{
-				Addresses: []v1.EndpointAddress{
-					{IP: "127.0.0.1"},
-				},
+				Addresses:  []string{"127.0.0.1"},
+				Conditions: discoveryv1.EndpointConditions{Ready: ready},
 			},
 		}
 	}
 
-	endpoint := &v1.Endpoints{
-		ObjectMeta: metav1.ObjectMeta{Name: name},
-		Subsets:    subsets,
+	sliceList := &discoveryv1.EndpointSliceList{
+		Items: []discoveryv1.EndpointSlice{
+			{
+				ObjectMeta: metav1.ObjectMeta{Name: name},
+				Endpoints:  endpoints,
+			},
+		},
 	}
 
-	return endpoint, nil
+	return sliceList, nil
 }
 
-func (e eClient) List(
-	ctx context.Context,
-	opts metav1.ListOptions,
-) (*v1.EndpointsList, error) {
-
-	return nil, errors.New("not implemented")
-}
-
-func (e eClient) Watch(
+func (e esClient) Watch(
 	ctx context.Context,
 	opts metav1.ListOptions,
 ) (watch.Interface, error) {
@@ -115,27 +127,27 @@ func (e eClient) Watch(
 	return nil, errors.New("not implemented")
 }
 
-func (e eClient) Patch(
+func (e esClient) Patch(
 	ctx context.Context,
 	name string,
 	pt types.PatchType,
 	data []byte,
 	opts metav1.PatchOptions,
 	subresources ...string,
-) (result *v1.Endpoints, err error) {
+) (result *discoveryv1.EndpointSlice, err error) {
 
 	return nil, errors.New("not implemented")
 }
 
-func (e eClient) Apply(
+func (e esClient) Apply(
 	ctx context.Context,
-	endpoints *corev1applyconfigurations.EndpointsApplyConfiguration,
+	endpointSlice *discoveryv1applyconfigurations.EndpointSliceApplyConfiguration,
 	opts metav1.ApplyOptions,
-) (result *v1.Endpoints, err error) {
+) (result *discoveryv1.EndpointSlice, err error) {
 
 	return nil, errors.New("not implemented")
 }
 
-func NewEClient() corev1.EndpointsInterface {
-	return eClient{}
+func NewEClient() discoveryv1client.EndpointSliceInterface {
+	return esClient{}
 }
