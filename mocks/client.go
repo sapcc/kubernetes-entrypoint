@@ -22,13 +22,14 @@ import (
 	v1apps "k8s.io/client-go/kubernetes/typed/apps/v1"
 	v1batch "k8s.io/client-go/kubernetes/typed/batch/v1"
 	v1core "k8s.io/client-go/kubernetes/typed/core/v1"
+	discoveryv1client "k8s.io/client-go/kubernetes/typed/discovery/v1"
 )
 
 type Client struct {
 	v1core.PodInterface
 	v1core.ServiceInterface
 	v1apps.DaemonSetInterface
-	v1core.EndpointsInterface
+	discoveryv1client.EndpointSliceInterface
 	v1batch.JobInterface
 
 	FakeCustomResource *unstructured.Unstructured
@@ -47,8 +48,8 @@ func (c Client) DaemonSets(namespace string) v1apps.DaemonSetInterface {
 	return c.DaemonSetInterface
 }
 
-func (c Client) Endpoints(namespace string) v1core.EndpointsInterface {
-	return c.EndpointsInterface
+func (c Client) EndpointSlices(namespace string) discoveryv1client.EndpointSliceInterface {
+	return c.EndpointSliceInterface
 }
 
 func (c Client) Jobs(namespace string) v1batch.JobInterface {
@@ -65,10 +66,10 @@ func (c Client) CustomResource(
 
 func NewClient() *Client {
 	return &Client{
-		PodInterface:       NewPClient(),
-		ServiceInterface:   NewSClient(),
-		DaemonSetInterface: NewDSClient(),
-		EndpointsInterface: NewEClient(),
-		JobInterface:       NewJClient(),
+		PodInterface:          NewPClient(),
+		ServiceInterface:      NewSClient(),
+		DaemonSetInterface:    NewDSClient(),
+		EndpointSliceInterface: NewEClient(),
+		JobInterface:          NewJClient(),
 	}
 }

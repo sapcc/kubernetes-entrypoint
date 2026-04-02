@@ -51,14 +51,18 @@ func NewService(name, namespace string) Service {
 }
 
 func (s Service) IsResolved(ctx context.Context, entrypoint entry.EntrypointInterface) (bool, error) {
-	e, err := entrypoint.Client().Endpoints(s.namespace).Get(ctx, s.name, metav1.GetOptions{})
+	slices, err := entrypoint.Client().EndpointSlices(s.namespace).List(ctx, metav1.ListOptions{
+		LabelSelector: "kubernetes.io/service-name=" + s.name,
+	})
 	if err != nil {
 		return false, err
 	}
 
-	for _, subset := range e.Subsets {
-		if len(subset.Addresses) > 0 {
-			return true, nil
+	for _, slice := range slices.Items {
+		for _, ep := range slice.Endpoints {
+			if (ep.Conditions.Ready == nil || *ep.Conditions.Ready) && len(ep.Addresses) > 0 {
+				return true, nil
+			}
 		}
 	}
 	return false, fmt.Errorf(FailingStatusFormat, s.name)
