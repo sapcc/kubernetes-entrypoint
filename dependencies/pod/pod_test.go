@@ -48,7 +48,8 @@ var _ = Describe("Pod", func() {
 	})
 
 	It("is resolved via all pods matching labels ready on same host", func() {
-		pod, _ := NewPod(map[string]string{"name": mocks.SameHostReadyMatchLabel}, podNamespace, requireSameNode)
+		pod, err := NewPod(map[string]string{"name": mocks.SameHostReadyMatchLabel}, podNamespace, requireSameNode)
+		Expect(err).NotTo(HaveOccurred())
 
 		isResolved, err := pod.IsResolved(context.TODO(), testEntrypoint)
 
@@ -57,7 +58,8 @@ var _ = Describe("Pod", func() {
 	})
 
 	It("is resolved via some pods matching labels ready on same host", func() {
-		pod, _ := NewPod(map[string]string{"name": mocks.SameHostSomeReadyMatchLabel}, podNamespace, requireSameNode)
+		pod, err := NewPod(map[string]string{"name": mocks.SameHostSomeReadyMatchLabel}, podNamespace, requireSameNode)
+		Expect(err).NotTo(HaveOccurred())
 
 		isResolved, err := pod.IsResolved(context.TODO(), testEntrypoint)
 
@@ -66,7 +68,8 @@ var _ = Describe("Pod", func() {
 	})
 
 	It("is not resolved via a pod matching labels not ready on same host", func() {
-		pod, _ := NewPod(map[string]string{"name": mocks.SameHostNotReadyMatchLabel}, podNamespace, requireSameNode)
+		pod, err := NewPod(map[string]string{"name": mocks.SameHostNotReadyMatchLabel}, podNamespace, requireSameNode)
+		Expect(err).NotTo(HaveOccurred())
 
 		isResolved, err := pod.IsResolved(context.TODO(), testEntrypoint)
 
@@ -75,7 +78,8 @@ var _ = Describe("Pod", func() {
 	})
 
 	It("is not resolved via pod matching labels ready on different host", func() {
-		pod, _ := NewPod(map[string]string{"name": mocks.DifferentHostReadyMatchLabel}, podNamespace, requireSameNode)
+		pod, err := NewPod(map[string]string{"name": mocks.DifferentHostReadyMatchLabel}, podNamespace, requireSameNode)
+		Expect(err).NotTo(HaveOccurred())
 
 		isResolved, err := pod.IsResolved(context.TODO(), testEntrypoint)
 
@@ -84,7 +88,8 @@ var _ = Describe("Pod", func() {
 	})
 
 	It("is resolved via pod matching labels ready on different host when requireSameNode=false", func() {
-		pod, _ := NewPod(map[string]string{"name": mocks.DifferentHostReadyMatchLabel}, podNamespace, false)
+		pod, err := NewPod(map[string]string{"name": mocks.DifferentHostReadyMatchLabel}, podNamespace, false)
+		Expect(err).NotTo(HaveOccurred())
 
 		isResolved, err := pod.IsResolved(context.TODO(), testEntrypoint)
 
@@ -93,7 +98,8 @@ var _ = Describe("Pod", func() {
 	})
 
 	It("is not resolved via pod matching labels not ready on different host when requireSameNode=false", func() {
-		pod, _ := NewPod(map[string]string{"name": mocks.DifferentHostNotReadyMatchLabel}, podNamespace, false)
+		pod, err := NewPod(map[string]string{"name": mocks.DifferentHostNotReadyMatchLabel}, podNamespace, false)
+		Expect(err).NotTo(HaveOccurred())
 
 		isResolved, err := pod.IsResolved(context.TODO(), testEntrypoint)
 
@@ -102,7 +108,8 @@ var _ = Describe("Pod", func() {
 	})
 
 	It("is not resolved via no pods matching labels", func() {
-		pod, _ := NewPod(map[string]string{"name": mocks.NoPodsMatchLabel}, podNamespace, requireSameNode)
+		pod, err := NewPod(map[string]string{"name": mocks.NoPodsMatchLabel}, podNamespace, requireSameNode)
+		Expect(err).NotTo(HaveOccurred())
 
 		isResolved, err := pod.IsResolved(context.TODO(), testEntrypoint)
 
@@ -111,7 +118,8 @@ var _ = Describe("Pod", func() {
 	})
 
 	It("is not resolved when getting pods matching labels from api fails", func() {
-		pod, _ := NewPod(map[string]string{"name": mocks.FailingMatchLabel}, podNamespace, requireSameNode)
+		pod, err := NewPod(map[string]string{"name": mocks.FailingMatchLabel}, podNamespace, requireSameNode)
+		Expect(err).NotTo(HaveOccurred())
 
 		isResolved, err := pod.IsResolved(context.TODO(), testEntrypoint)
 
@@ -121,7 +129,8 @@ var _ = Describe("Pod", func() {
 
 	It(fmt.Sprintf("is not resolved when getting current pod via %s value fails", PodNameEnvVar), func() {
 		os.Setenv(PodNameEnvVar, mocks.PodNotPresent)
-		pod, _ := NewPod(map[string]string{"name": mocks.SameHostReadyMatchLabel}, podNamespace, requireSameNode)
+		pod, err := NewPod(map[string]string{"name": mocks.SameHostReadyMatchLabel}, podNamespace, requireSameNode)
+		Expect(err).NotTo(HaveOccurred())
 
 		isResolved, err := pod.IsResolved(context.TODO(), testEntrypoint)
 

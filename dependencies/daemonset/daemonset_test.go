@@ -45,7 +45,8 @@ var _ = Describe("Daemonset", func() {
 	})
 
 	It("checks resolution of a succeeding daemonset", func() {
-		daemonset, _ := NewDaemonset(mocks.SucceedingDaemonsetName, daemonsetNamespace)
+		daemonset, err := NewDaemonset(mocks.SucceedingDaemonsetName, daemonsetNamespace)
+		Expect(err).NotTo(HaveOccurred())
 
 		isResolved, err := daemonset.IsResolved(context.TODO(), testEntrypoint)
 
@@ -54,7 +55,8 @@ var _ = Describe("Daemonset", func() {
 	})
 
 	It("checks resolution failure of a daemonset with incorrect name", func() {
-		daemonset, _ := NewDaemonset(mocks.FailingDaemonsetName, daemonsetNamespace)
+		daemonset, err := NewDaemonset(mocks.FailingDaemonsetName, daemonsetNamespace)
+		Expect(err).NotTo(HaveOccurred())
 
 		isResolved, err := daemonset.IsResolved(context.TODO(), testEntrypoint)
 
@@ -63,7 +65,8 @@ var _ = Describe("Daemonset", func() {
 	})
 
 	It("checks resolution failure of a daemonset with incorrect match labels", func() {
-		daemonset, _ := NewDaemonset(mocks.FailingMatchLabelsDaemonsetName, daemonsetNamespace)
+		daemonset, err := NewDaemonset(mocks.FailingMatchLabelsDaemonsetName, daemonsetNamespace)
+		Expect(err).NotTo(HaveOccurred())
 
 		isResolved, err := daemonset.IsResolved(context.TODO(), testEntrypoint)
 
@@ -74,7 +77,8 @@ var _ = Describe("Daemonset", func() {
 	It(fmt.Sprintf("checks resolution failure of a daemonset with incorrect %s value", PodNameEnvVar), func() {
 		// Set POD_NAME to value not present in the mocks
 		os.Setenv(PodNameEnvVar, mocks.PodNotPresent)
-		daemonset, _ := NewDaemonset(mocks.FailingMatchLabelsDaemonsetName, daemonsetNamespace)
+		daemonset, err := NewDaemonset(mocks.FailingMatchLabelsDaemonsetName, daemonsetNamespace)
+		Expect(err).NotTo(HaveOccurred())
 
 		isResolved, err := daemonset.IsResolved(context.TODO(), testEntrypoint)
 
@@ -83,7 +87,8 @@ var _ = Describe("Daemonset", func() {
 	})
 
 	It("checks resolution failure of a daemonset with none of the pods with Ready status", func() {
-		daemonset, _ := NewDaemonset(mocks.NotReadyMatchLabelsDaemonsetName, daemonsetNamespace)
+		daemonset, err := NewDaemonset(mocks.NotReadyMatchLabelsDaemonsetName, daemonsetNamespace)
+		Expect(err).NotTo(HaveOccurred())
 
 		isResolved, err := daemonset.IsResolved(context.TODO(), testEntrypoint)
 

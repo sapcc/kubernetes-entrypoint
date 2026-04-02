@@ -33,7 +33,8 @@ var _ = Describe("Container", func() {
 	})
 
 	It(fmt.Sprintf("checks container resolution failure with %s not set", podEnvVariableName), func() {
-		os.Unsetenv(podEnvVariableName)
+		err := os.Unsetenv(podEnvVariableName)
+		Expect(err).NotTo(HaveOccurred())
 		container := NewContainer(mocks.MockContainerName)
 
 		isResolved, err := container.IsResolved(context.TODO(), testEntrypoint)
