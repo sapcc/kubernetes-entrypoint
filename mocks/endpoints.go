@@ -34,8 +34,6 @@ const (
 	MockEndpointError = "mock endpoint didnt work"
 )
 
-func boolPtr(b bool) *bool { return &b }
-
 func (e esClient) Create(
 	ctx context.Context,
 	endpointSlice *discoveryv1.EndpointSlice,
@@ -96,7 +94,7 @@ func (e esClient) List(
 	var endpoints []discoveryv1.Endpoint
 
 	if name != EmptySubsetsServiceName {
-		ready := boolPtr(true)
+		ready := new(true)
 		endpoints = []discoveryv1.Endpoint{
 			{
 				Addresses:  []string{"127.0.0.1"},

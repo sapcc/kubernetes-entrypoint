@@ -89,7 +89,6 @@ func (p Pod) IsResolved(ctx context.Context, entrypoint entry.EntrypointInterfac
 	podCount := 0
 	for _, pod := range matchingPods {
 		podCount++
-		// pinning
 		if p.requireSameNode && !isPodOnHost(&pod, myHost) {
 			continue
 		}
