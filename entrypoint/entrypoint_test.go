@@ -75,7 +75,7 @@ var _ = Describe("Entrypoint", func() {
 	It("registers new non-nil resolver", func() {
 		defer GinkgoRecover()
 		Register(dummy)
-		Expect(len(dependencies)).To(Equal(1))
+		Expect(dependencies).To(HaveLen(1))
 	})
 
 	It("checks Client() method", func() {

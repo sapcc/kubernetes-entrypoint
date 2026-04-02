@@ -2,6 +2,7 @@ package container
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -26,7 +27,7 @@ type Container struct {
 func init() {
 	containerEnv := fmt.Sprintf("%sCONTAINER", entry.DependencyPrefix)
 	if util.ContainsSeparator(containerEnv, "Container") {
-		logger.Error.Printf(NamespaceNotSupported)
+		logger.Error.Print(NamespaceNotSupported)
 		os.Exit(1)
 	}
 	if containerDeps := env.SplitEnvToDeps(containerEnv); containerDeps != nil {
@@ -45,7 +46,7 @@ func NewContainer(name string) Container {
 func (c Container) IsResolved(ctx context.Context, entrypoint entry.EntrypointInterface) (bool, error) {
 	myPodName := os.Getenv("POD_NAME")
 	if myPodName == "" {
-		return false, fmt.Errorf(PodNameNotSetError)
+		return false, errors.New(PodNameNotSetError)
 	}
 	pod, err := entrypoint.Client().Pods(env.GetBaseNamespace()).Get(ctx, myPodName, metav1.GetOptions{})
 	if err != nil {

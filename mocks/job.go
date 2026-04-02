@@ -2,7 +2,7 @@ package mocks
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	v1 "k8s.io/api/batch/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,7 +26,8 @@ func (j jClient) Create(
 	job *v1.Job,
 	opts metav1.CreateOptions,
 ) (*v1.Job, error) {
-	return nil, fmt.Errorf("not implemented")
+
+	return nil, errors.New("not implemented")
 }
 
 func (j jClient) Update(
@@ -34,7 +35,8 @@ func (j jClient) Update(
 	job *v1.Job,
 	opts metav1.UpdateOptions,
 ) (*v1.Job, error) {
-	return nil, fmt.Errorf("not implemented")
+
+	return nil, errors.New("not implemented")
 }
 
 func (j jClient) UpdateStatus(
@@ -42,11 +44,12 @@ func (j jClient) UpdateStatus(
 	job *v1.Job,
 	opts metav1.UpdateOptions,
 ) (*v1.Job, error) {
-	return nil, fmt.Errorf("not implemented")
+
+	return nil, errors.New("not implemented")
 }
 
 func (j jClient) Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error {
-	return fmt.Errorf("not implemented")
+	return errors.New("not implemented")
 }
 
 func (j jClient) DeleteCollection(
@@ -54,7 +57,8 @@ func (j jClient) DeleteCollection(
 	opts metav1.DeleteOptions,
 	listOpts metav1.ListOptions,
 ) error {
-	return fmt.Errorf("not implemented")
+
+	return errors.New("not implemented")
 }
 
 func (j jClient) Get(ctx context.Context, name string, opts metav1.GetOptions) (*v1.Job, error) {
@@ -68,19 +72,19 @@ func (j jClient) Get(ctx context.Context, name string, opts metav1.GetOptions) (
 			Status: v1.JobStatus{Succeeded: 0},
 		}, nil
 	}
-	return nil, fmt.Errorf("mock job didnt work")
+	return nil, errors.New("mock job didnt work")
 }
 
 func (j jClient) List(ctx context.Context, opts metav1.ListOptions) (*v1.JobList, error) {
 	var jobs []v1.Job
 
 	switch opts.LabelSelector {
-	case fmt.Sprintf("name=%s", SucceedingJobLabel):
+	case "name=" + SucceedingJobLabel:
 		jobs = []v1.Job{NewJob(1)}
-	case fmt.Sprintf("name=%s", FailingJobLabel):
+	case "name=" + FailingJobLabel:
 		jobs = []v1.Job{NewJob(1), NewJob(0)}
 	default:
-		return nil, fmt.Errorf("mock job didnt work")
+		return nil, errors.New("mock job didnt work")
 	}
 
 	return &v1.JobList{
@@ -89,7 +93,7 @@ func (j jClient) List(ctx context.Context, opts metav1.ListOptions) (*v1.JobList
 }
 
 func (j jClient) Watch(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error) {
-	return nil, fmt.Errorf("not implemented")
+	return nil, errors.New("not implemented")
 }
 
 func (j jClient) Patch(
@@ -100,7 +104,8 @@ func (j jClient) Patch(
 	opts metav1.PatchOptions,
 	subresources ...string,
 ) (result *v1.Job, err error) {
-	return nil, fmt.Errorf("not implemented")
+
+	return nil, errors.New("not implemented")
 }
 
 func (j jClient) Apply(
@@ -108,7 +113,8 @@ func (j jClient) Apply(
 	job *batchv1applyconfigurations.JobApplyConfiguration,
 	opts metav1.ApplyOptions,
 ) (result *v1.Job, err error) {
-	return nil, fmt.Errorf("not implemented")
+
+	return nil, errors.New("not implemented")
 }
 
 func (j jClient) ApplyStatus(
@@ -116,7 +122,8 @@ func (j jClient) ApplyStatus(
 	job *batchv1applyconfigurations.JobApplyConfiguration,
 	opts metav1.ApplyOptions,
 ) (result *v1.Job, err error) {
-	return nil, fmt.Errorf("not implemented")
+
+	return nil, errors.New("not implemented")
 }
 
 func NewJClient() v1batch.JobInterface {

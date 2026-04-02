@@ -1,6 +1,7 @@
 package util
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -13,16 +14,16 @@ import (
 func GetIp() (string, error) {
 	var iface string
 	if iface = os.Getenv("INTERFACE_NAME"); iface == "" {
-		return "", fmt.Errorf("environment variable INTERFACE_NAME not set")
+		return "", errors.New("environment variable INTERFACE_NAME not set")
 	}
 	i, err := net.InterfaceByName(iface)
 	if err != nil {
-		return "", fmt.Errorf("cannot get iface: %v", err)
+		return "", fmt.Errorf("cannot get iface: %w", err)
 	}
 
 	address, err := i.Addrs()
 	if err != nil || len(address) == 0 {
-		return "", fmt.Errorf("cannot get ip: %v", err)
+		return "", fmt.Errorf("cannot get ip: %w", err)
 	}
 	// Take first element to get rid of subnet
 	ip := strings.Split(address[0].String(), "/")[0]

@@ -2,6 +2,7 @@ package mocks
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	v1 "k8s.io/api/core/v1"
@@ -36,7 +37,8 @@ func (p pClient) Create(
 	pod *v1.Pod,
 	opts metav1.CreateOptions,
 ) (*v1.Pod, error) {
-	return nil, fmt.Errorf("not implemented")
+
+	return nil, errors.New("not implemented")
 }
 
 func (p pClient) Update(
@@ -44,7 +46,8 @@ func (p pClient) Update(
 	pod *v1.Pod,
 	opts metav1.UpdateOptions,
 ) (*v1.Pod, error) {
-	return nil, fmt.Errorf("not implemented")
+
+	return nil, errors.New("not implemented")
 }
 
 func (p pClient) UpdateStatus(
@@ -52,11 +55,12 @@ func (p pClient) UpdateStatus(
 	pod *v1.Pod,
 	opts metav1.UpdateOptions,
 ) (*v1.Pod, error) {
-	return nil, fmt.Errorf("not implemented")
+
+	return nil, errors.New("not implemented")
 }
 
 func (p pClient) Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error {
-	return fmt.Errorf("not implemented")
+	return errors.New("not implemented")
 }
 
 func (p pClient) DeleteCollection(
@@ -64,7 +68,8 @@ func (p pClient) DeleteCollection(
 	opts metav1.DeleteOptions,
 	listOpts metav1.ListOptions,
 ) error {
-	return fmt.Errorf("not implemented")
+
+	return errors.New("not implemented")
 }
 
 func (p pClient) Get(ctx context.Context, name string, opts metav1.GetOptions) (*v1.Pod, error) {
@@ -87,8 +92,8 @@ func (p pClient) Get(ctx context.Context, name string, opts metav1.GetOptions) (
 }
 
 func (p pClient) List(ctx context.Context, opts metav1.ListOptions) (*v1.PodList, error) {
-	if opts.LabelSelector == fmt.Sprintf("name=%s", FailingMatchLabel) {
-		return nil, fmt.Errorf("Client received incorrect pod label names")
+	if opts.LabelSelector == "name="+FailingMatchLabel {
+		return nil, errors.New("Client received incorrect pod label names")
 	}
 
 	readyPodSameHost := NewPod(true, "127.0.0.1")
@@ -98,22 +103,22 @@ func (p pClient) List(ctx context.Context, opts metav1.ListOptions) (*v1.PodList
 
 	var pods []v1.Pod
 
-	if opts.LabelSelector == fmt.Sprintf("name=%s", SameHostNotReadyMatchLabel) {
+	if opts.LabelSelector == "name="+SameHostNotReadyMatchLabel {
 		pods = []v1.Pod{notReadyPodSameHost}
 	}
-	if opts.LabelSelector == fmt.Sprintf("name=%s", SameHostReadyMatchLabel) {
+	if opts.LabelSelector == "name="+SameHostReadyMatchLabel {
 		pods = []v1.Pod{readyPodSameHost, notReadyPodDifferentHost}
 	}
-	if opts.LabelSelector == fmt.Sprintf("name=%s", SameHostSomeReadyMatchLabel) {
+	if opts.LabelSelector == "name="+SameHostSomeReadyMatchLabel {
 		pods = []v1.Pod{readyPodSameHost, notReadyPodSameHost}
 	}
-	if opts.LabelSelector == fmt.Sprintf("name=%s", DifferentHostReadyMatchLabel) {
+	if opts.LabelSelector == "name="+DifferentHostReadyMatchLabel {
 		pods = []v1.Pod{notReadyPodSameHost, readyPodDifferentHost}
 	}
-	if opts.LabelSelector == fmt.Sprintf("name=%s", DifferentHostNotReadyMatchLabel) {
+	if opts.LabelSelector == "name="+DifferentHostNotReadyMatchLabel {
 		pods = []v1.Pod{notReadyPodDifferentHost}
 	}
-	if opts.LabelSelector == fmt.Sprintf("name=%s", NoPodsMatchLabel) {
+	if opts.LabelSelector == "name="+NoPodsMatchLabel {
 		pods = []v1.Pod{}
 	}
 
@@ -123,7 +128,7 @@ func (p pClient) List(ctx context.Context, opts metav1.ListOptions) (*v1.PodList
 }
 
 func (p pClient) Watch(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error) {
-	return nil, fmt.Errorf("not implemented")
+	return nil, errors.New("not implemented")
 }
 
 func (p pClient) Patch(
@@ -134,7 +139,8 @@ func (p pClient) Patch(
 	opts metav1.PatchOptions,
 	subresources ...string,
 ) (result *v1.Pod, err error) {
-	return nil, fmt.Errorf("not implemented")
+
+	return nil, errors.New("not implemented")
 }
 
 func (p pClient) Apply(
@@ -142,7 +148,8 @@ func (p pClient) Apply(
 	pod *corev1applyconfigurations.PodApplyConfiguration,
 	opts metav1.ApplyOptions,
 ) (result *v1.Pod, err error) {
-	return nil, fmt.Errorf("not implemented")
+
+	return nil, errors.New("not implemented")
 }
 
 func (p pClient) ApplyStatus(
@@ -150,7 +157,8 @@ func (p pClient) ApplyStatus(
 	pod *corev1applyconfigurations.PodApplyConfiguration,
 	opts metav1.ApplyOptions,
 ) (result *v1.Pod, err error) {
-	return nil, fmt.Errorf("not implemented")
+
+	return nil, errors.New("not implemented")
 }
 
 func (p pClient) UpdateEphemeralContainers(
@@ -159,7 +167,8 @@ func (p pClient) UpdateEphemeralContainers(
 	pod *v1.Pod,
 	opts metav1.UpdateOptions,
 ) (*v1.Pod, error) {
-	return nil, fmt.Errorf("not implemented")
+
+	return nil, errors.New("not implemented")
 }
 
 func (p pClient) UpdateResize(
@@ -168,7 +177,8 @@ func (p pClient) UpdateResize(
 	pod *v1.Pod,
 	opts metav1.UpdateOptions,
 ) (*v1.Pod, error) {
-	return nil, fmt.Errorf("not implemented")
+
+	return nil, errors.New("not implemented")
 }
 
 func (p pClient) Bind(
@@ -176,19 +186,20 @@ func (p pClient) Bind(
 	binding *v1.Binding,
 	opts metav1.CreateOptions,
 ) error {
-	return fmt.Errorf("not implemented")
+
+	return errors.New("not implemented")
 }
 
 func (p pClient) Evict(ctx context.Context, eviction *policyv1beta1.Eviction) error {
-	return fmt.Errorf("not implemented")
+	return errors.New("not implemented")
 }
 
 func (p pClient) EvictV1(ctx context.Context, eviction *policyv1.Eviction) error {
-	return fmt.Errorf("not implemented")
+	return errors.New("not implemented")
 }
 
 func (p pClient) EvictV1beta1(ctx context.Context, eviction *policyv1beta1.Eviction) error {
-	return fmt.Errorf("not implemented")
+	return errors.New("not implemented")
 }
 
 func (p pClient) GetLogs(name string, opts *v1.PodLogOptions) *restclient.Request {
@@ -199,6 +210,7 @@ func (p pClient) ProxyGet(
 	scheme, name, port, path string,
 	params map[string]string,
 ) restclient.ResponseWrapper {
+
 	return nil
 }
 

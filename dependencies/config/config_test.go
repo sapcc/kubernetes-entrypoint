@@ -101,7 +101,7 @@ var _ = Describe("Config", func() {
 	It("creates new config from file", func() {
 		config, err := NewConfig(testConfigPath, templatePrefix)
 
-		Expect(config).NotTo(Equal(nil))
+		Expect(config).NotTo(BeNil())
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -109,7 +109,7 @@ var _ = Describe("Config", func() {
 		config, err := NewConfig(testConfigPath, templatePrefix)
 		Expect(config.name).To(Equal(testConfigPath))
 
-		Expect(config).NotTo(Equal(nil))
+		Expect(config).NotTo(BeNil())
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -135,7 +135,7 @@ var _ = Describe("Config", func() {
 
 		isResolved, err := config.IsResolved(context.TODO(), testEntrypoint)
 
-		Expect(isResolved).To(Equal(true))
+		Expect(isResolved).To(BeTrue())
 		Expect(err).NotTo(HaveOccurred())
 	})
 })

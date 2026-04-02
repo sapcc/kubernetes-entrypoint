@@ -2,7 +2,7 @@ package mocks
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	v1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,7 +30,8 @@ func (d dClient) Create(
 	daemonSet *v1.DaemonSet,
 	opts metav1.CreateOptions,
 ) (*v1.DaemonSet, error) {
-	return nil, fmt.Errorf("not implemented")
+
+	return nil, errors.New("not implemented")
 }
 
 func (d dClient) Update(
@@ -38,7 +39,8 @@ func (d dClient) Update(
 	daemonSet *v1.DaemonSet,
 	opts metav1.UpdateOptions,
 ) (*v1.DaemonSet, error) {
-	return nil, fmt.Errorf("not implemented")
+
+	return nil, errors.New("not implemented")
 }
 
 func (d dClient) UpdateStatus(
@@ -46,11 +48,12 @@ func (d dClient) UpdateStatus(
 	daemonSet *v1.DaemonSet,
 	opts metav1.UpdateOptions,
 ) (*v1.DaemonSet, error) {
-	return nil, fmt.Errorf("not implemented")
+
+	return nil, errors.New("not implemented")
 }
 
 func (d dClient) Delete(ctx context.Context, name string, opts metav1.DeleteOptions) error {
-	return fmt.Errorf("not implemented")
+	return errors.New("not implemented")
 }
 
 func (d dClient) DeleteCollection(
@@ -58,7 +61,8 @@ func (d dClient) DeleteCollection(
 	opts metav1.DeleteOptions,
 	listOpts metav1.ListOptions,
 ) error {
-	return fmt.Errorf("not implemented")
+
+	return errors.New("not implemented")
 }
 
 func (d dClient) Get(
@@ -66,8 +70,9 @@ func (d dClient) Get(
 	name string,
 	opts metav1.GetOptions,
 ) (*v1.DaemonSet, error) {
+
 	if name == FailingDaemonsetName || name == IncorrectNamespaceDaemonsetName {
-		return nil, fmt.Errorf("mock daemonset didn't work")
+		return nil, errors.New("mock daemonset didn't work")
 	}
 
 	matchLabelName := MockContainerName
@@ -88,18 +93,18 @@ func (d dClient) Get(
 	}
 
 	if name == CorrectNamespaceDaemonsetName {
-		ds.ObjectMeta.Namespace = CorrectDaemonsetNamespace
+		ds.Namespace = CorrectDaemonsetNamespace
 	}
 
 	return ds, nil
 }
 
 func (d dClient) List(ctx context.Context, opts metav1.ListOptions) (*v1.DaemonSetList, error) {
-	return nil, fmt.Errorf("not implemented")
+	return nil, errors.New("not implemented")
 }
 
 func (d dClient) Watch(ctx context.Context, opts metav1.ListOptions) (watch.Interface, error) {
-	return nil, fmt.Errorf("not implemented")
+	return nil, errors.New("not implemented")
 }
 
 func (d dClient) Patch(
@@ -110,7 +115,8 @@ func (d dClient) Patch(
 	opts metav1.PatchOptions,
 	subresources ...string,
 ) (result *v1.DaemonSet, err error) {
-	return nil, fmt.Errorf("not implemented")
+
+	return nil, errors.New("not implemented")
 }
 
 func (d dClient) Apply(
@@ -118,7 +124,8 @@ func (d dClient) Apply(
 	daemonSet *appsv1applyconfigurations.DaemonSetApplyConfiguration,
 	opts metav1.ApplyOptions,
 ) (result *v1.DaemonSet, err error) {
-	return nil, fmt.Errorf("not implemented")
+
+	return nil, errors.New("not implemented")
 }
 
 func (d dClient) ApplyStatus(
@@ -126,7 +133,8 @@ func (d dClient) ApplyStatus(
 	daemonSet *appsv1applyconfigurations.DaemonSetApplyConfiguration,
 	opts metav1.ApplyOptions,
 ) (result *v1.DaemonSet, err error) {
-	return nil, fmt.Errorf("not implemented")
+
+	return nil, errors.New("not implemented")
 }
 
 func NewDSClient() appsv1.DaemonSetInterface {

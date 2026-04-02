@@ -35,7 +35,7 @@ var _ = Describe("Service", func() {
 
 		isResolved, err := service.IsResolved(context.TODO(), testEntrypoint)
 
-		Expect(isResolved).To(Equal(true))
+		Expect(isResolved).To(BeTrue())
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -44,7 +44,7 @@ var _ = Describe("Service", func() {
 
 		isResolved, err := service.IsResolved(context.TODO(), testEntrypoint)
 
-		Expect(isResolved).To(Equal(false))
+		Expect(isResolved).To(BeFalse())
 		Expect(err.Error()).To(Equal(mocks.MockEndpointError))
 	})
 
@@ -52,7 +52,7 @@ var _ = Describe("Service", func() {
 		service := NewService(mocks.EmptySubsetsServiceName, mocks.EmptySubsetsServiceName)
 
 		isResolved, err := service.IsResolved(context.TODO(), testEntrypoint)
-		Expect(isResolved).To(Equal(false))
+		Expect(isResolved).To(BeFalse())
 		Expect(err.Error()).To(Equal(fmt.Sprintf(FailingStatusFormat, service.name)))
 	})
 })

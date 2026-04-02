@@ -21,7 +21,7 @@ type Job struct {
 }
 
 func init() {
-	jobsEnv := fmt.Sprintf("%sJOBS", entry.DependencyPrefix)
+	jobsEnv := entry.DependencyPrefix + "JOBS"
 	jobsJsonEnv := fmt.Sprintf("%s%s", jobsEnv, entry.JsonSuffix)
 	if jobsDeps := env.SplitJobEnvToDeps(jobsEnv, jobsJsonEnv); jobsDeps != nil {
 		if len(jobsDeps) > 0 {
@@ -82,7 +82,7 @@ func (j Job) IsResolved(ctx context.Context, entrypoint entry.EntrypointInterfac
 func (j Job) String() string {
 	prefix := "Jobs"
 	if j.name != "" {
-		prefix = fmt.Sprintf("Job %s", j.name)
+		prefix = "Job " + j.name
 	} else if j.labels != nil {
 		prefix = fmt.Sprintf("Jobs with labels %s", j.labels)
 	}
