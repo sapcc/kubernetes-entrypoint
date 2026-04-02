@@ -107,7 +107,7 @@ func SplitPodEnvToDeps(env string) []PodDependency {
 }
 
 // SplitJobEnvToDeps returns list of JobDependency
-func SplitJobEnvToDeps(env string, jsonEnv string) []JobDependency {
+func SplitJobEnvToDeps(env, jsonEnv string) []JobDependency {
 	deps := []JobDependency{}
 
 	namespace := GetBaseNamespace()

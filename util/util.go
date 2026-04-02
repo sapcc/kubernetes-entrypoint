@@ -30,7 +30,7 @@ func GetIp() (string, error) {
 	return ip, nil
 }
 
-func ContainsSeparator(envString string, kind string) bool {
+func ContainsSeparator(envString, kind string) bool {
 	if strings.Contains(envString, env.Separator) {
 		logger.Error.Printf("%s doesn't accept namespace: %s", kind, envString)
 		return true
