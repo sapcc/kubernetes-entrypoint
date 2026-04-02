@@ -3,6 +3,7 @@ package customresource
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -32,7 +33,7 @@ type Field struct {
 }
 
 func init() {
-	crEnv := fmt.Sprintf("%sCUSTOM_RESOURCE", entrypoint.DependencyPrefix)
+	crEnv := entrypoint.DependencyPrefix + "CUSTOM_RESOURCE"
 	resolvers, err := fromEnv(crEnv)
 	if err != nil {
 		logger.Error.Printf("Error initializing custom resource: %s", err.Error()) // Fixed format string
@@ -107,7 +108,7 @@ func parseKey(key string) (*jsonpath.JSONPath, error) {
 
 // evaluateJSONPath executes a parsed JSONPath against a resource and returns the value.
 // It returns an error if the JSONPath returns no results, multiple results, or invalid values.
-func evaluateJSONPath(jp *jsonpath.JSONPath, resource map[string]interface{}) (interface{}, error) {
+func evaluateJSONPath(jp *jsonpath.JSONPath, resource map[string]any) (any, error) {
 	results, err := jp.FindResults(resource)
 	if err != nil {
 		return nil, fmt.Errorf("error executing JSONPath: %w", err)
@@ -115,11 +116,11 @@ func evaluateJSONPath(jp *jsonpath.JSONPath, resource map[string]interface{}) (i
 
 	// Ensure we have exactly one result set
 	if len(results) == 0 || len(results[0]) == 0 {
-		return nil, fmt.Errorf("JSONPath returned no results")
+		return nil, errors.New("JSONPath returned no results")
 	}
 
 	if len(results) > 1 || len(results[0]) > 1 {
-		return nil, fmt.Errorf("JSONPath returned multiple values; only single-value results are allowed")
+		return nil, errors.New("JSONPath returned multiple values; only single-value results are allowed")
 	}
 
 	// Get the single result value
@@ -127,7 +128,7 @@ func evaluateJSONPath(jp *jsonpath.JSONPath, resource map[string]interface{}) (i
 
 	// Extract the actual value from reflect.Value
 	if !value.IsValid() {
-		return nil, fmt.Errorf("JSONPath returned invalid value")
+		return nil, errors.New("JSONPath returned invalid value")
 	}
 
 	return value.Interface(), nil

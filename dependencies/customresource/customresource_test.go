@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
 	"opendev.org/airship/kubernetes-entrypoint/mocks"
 )
 
@@ -163,15 +164,15 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "Successful",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
 					"namespace":  "default",
 					"simpleKey":  "ready",
-					"complex": map[string]interface{}{
-						"key": map[string]interface{}{
-							"with": map[string]interface{}{
+					"complex": map[string]any{
+						"key": map[string]any{
+							"with": map[string]any{
 								"layers": "ready",
 							},
 						},
@@ -200,7 +201,7 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "DotNotationNumericValue",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
@@ -226,7 +227,7 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "DotNotationBooleanValue",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
@@ -252,7 +253,7 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "DotNotationNullValue",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
@@ -278,12 +279,12 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "DotNotationNestedNumeric",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
 					"namespace":  "default",
-					"spec": map[string]interface{}{
+					"spec": map[string]any{
 						"replicas": int64(5),
 					},
 				},
@@ -306,7 +307,7 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "DotNotationFloatValue",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
@@ -332,7 +333,7 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "JSONPathSimple",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
@@ -358,13 +359,13 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "JSONPathNested",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
 					"namespace":  "default",
-					"spec": map[string]interface{}{
-						"template": map[string]interface{}{
+					"spec": map[string]any{
+						"template": map[string]any{
 							"status": "ready",
 						},
 					},
@@ -388,7 +389,7 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "JSONPathNumericValue",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
@@ -414,7 +415,7 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "JSONPathBooleanValue",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
@@ -440,16 +441,16 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "JSONPathArrayIndexing",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
 					"namespace":  "default",
-					"items": []interface{}{
-						map[string]interface{}{
+					"items": []any{
+						map[string]any{
 							"status": "ready",
 						},
-						map[string]interface{}{
+						map[string]any{
 							"status": "pending",
 						},
 					},
@@ -473,7 +474,7 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "JSONPathMixedWithDotNotation",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
@@ -504,7 +505,7 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "JSONPathInvalidSyntax",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
@@ -530,7 +531,7 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "JSONPathNoResults",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
@@ -555,16 +556,16 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "JSONPathMultipleResults",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
 					"namespace":  "default",
-					"items": []interface{}{
-						map[string]interface{}{
+					"items": []any{
+						map[string]any{
 							"status": "ready",
 						},
-						map[string]interface{}{
+						map[string]any{
 							"status": "pending",
 						},
 					},
@@ -588,12 +589,12 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "JSONPathNonPrimitiveObject",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
 					"namespace":  "default",
-					"complex": map[string]interface{}{
+					"complex": map[string]any{
 						"nested": "value",
 					},
 				},
@@ -616,12 +617,12 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "JSONPathNonPrimitiveArray",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
 					"namespace":  "default",
-					"items": []interface{}{
+					"items": []any{
 						"item1",
 						"item2",
 					},
@@ -645,7 +646,7 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "JSONPathValueMismatch",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
@@ -671,7 +672,7 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "JSONPathFloatValue",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
@@ -697,7 +698,7 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "JSONPathNullValue",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
@@ -723,7 +724,7 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "JSONPathWithCurlyBraces",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
@@ -749,7 +750,7 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "Unresolved",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
@@ -783,7 +784,7 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "BadCustomResource",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",
@@ -809,7 +810,7 @@ func TestIsResolved(t *testing.T) {
 		{
 			name: "MissingKey",
 			customResource: &unstructured.Unstructured{
-				Object: map[string]interface{}{
+				Object: map[string]any{
 					"apiVersion": "stable.example.com/v1",
 					"kind":       "Foo",
 					"name":       "my-foo",

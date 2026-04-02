@@ -60,12 +60,12 @@ var _ = Describe("Socket", func() {
 		Expect(socket.name).To(Equal(existingSocketPath))
 	})
 
-	It("resolves an existing socket socket", func() {
+	It("resolves an existing socket", func() {
 		socket := NewSocket(existingSocketPath)
 
 		isResolved, err := socket.IsResolved(context.TODO(), testEntrypoint)
 
-		Expect(isResolved).To(Equal(true))
+		Expect(isResolved).To(BeTrue())
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -74,7 +74,7 @@ var _ = Describe("Socket", func() {
 
 		isResolved, err := socket.IsResolved(context.TODO(), testEntrypoint)
 
-		Expect(isResolved).To(Equal(false))
+		Expect(isResolved).To(BeFalse())
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(Equal(fmt.Sprintf(NonExistingErrorFormat, socket)))
 	})

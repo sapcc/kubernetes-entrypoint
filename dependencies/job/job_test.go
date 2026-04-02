@@ -49,7 +49,7 @@ var _ = Describe("Job", func() {
 
 		isResolved, err := job.IsResolved(context.TODO(), testEntrypoint)
 
-		Expect(isResolved).To(Equal(true))
+		Expect(isResolved).To(BeTrue())
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -58,7 +58,7 @@ var _ = Describe("Job", func() {
 
 		isResolved, err := job.IsResolved(context.TODO(), testEntrypoint)
 
-		Expect(isResolved).To(Equal(false))
+		Expect(isResolved).To(BeFalse())
 		Expect(err.Error()).To(Equal(fmt.Sprintf(FailingStatusFormat, job)))
 	})
 
@@ -67,7 +67,7 @@ var _ = Describe("Job", func() {
 
 		isResolved, err := job.IsResolved(context.TODO(), testEntrypoint)
 
-		Expect(isResolved).To(Equal(true))
+		Expect(isResolved).To(BeTrue())
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -76,7 +76,7 @@ var _ = Describe("Job", func() {
 
 		isResolved, err := job.IsResolved(context.TODO(), testEntrypoint)
 
-		Expect(isResolved).To(Equal(false))
+		Expect(isResolved).To(BeFalse())
 		Expect(err.Error()).To(Equal(fmt.Sprintf(FailingStatusFormat, job)))
 	})
 })

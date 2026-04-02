@@ -18,7 +18,7 @@ type Service struct {
 }
 
 func init() {
-	serviceEnv := fmt.Sprintf("%sSERVICE", entry.DependencyPrefix)
+	serviceEnv := entry.DependencyPrefix + "SERVICE"
 	if serviceDeps := env.SplitEnvToDeps(serviceEnv); serviceDeps != nil {
 		if len(serviceDeps) > 0 {
 			for _, dep := range serviceDeps {

@@ -53,7 +53,7 @@ func NewPod(labels map[string]string, namespace string, requireSameNode bool) (*
 func (p Pod) IsResolved(ctx context.Context, entrypoint entry.EntrypointInterface) (bool, error) {
 	myPod, err := entrypoint.Client().Pods(env.GetBaseNamespace()).Get(ctx, p.podName, metav1.GetOptions{})
 	if err != nil {
-		return false, fmt.Errorf("getting POD: %v failed : %v", p.podName, err)
+		return false, fmt.Errorf("getting POD: %v failed : %w", p.podName, err)
 	}
 	myHost := myPod.Status.HostIP
 
@@ -74,7 +74,7 @@ func (p Pod) IsResolved(ctx context.Context, entrypoint entry.EntrypointInterfac
 	podCount := 0
 	for _, pod := range matchingPods {
 		podCount++
-		pod := pod // pinning
+		// pinning
 		if p.requireSameNode && !isPodOnHost(&pod, myHost) {
 			continue
 		}

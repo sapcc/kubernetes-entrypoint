@@ -32,9 +32,9 @@ type Config struct {
 }
 
 func init() {
-	configEnv := fmt.Sprintf("%sCONFIG", entry.DependencyPrefix)
+	configEnv := entry.DependencyPrefix + "CONFIG"
 	if util.ContainsSeparator(configEnv, "Config") {
-		logger.Error.Printf(NamespaceNotSupported)
+		logger.Error.Print(NamespaceNotSupported)
 		os.Exit(1)
 	}
 	if configDeps := env.SplitEnvToDeps(configEnv); len(configDeps) > 0 {
@@ -51,12 +51,12 @@ func init() {
 func NewConfig(name string, prefix string) (*Config, error) {
 	hostname, err := os.Hostname()
 	if err != nil {
-		return nil, fmt.Errorf("cannot determine hostname: %v", err)
+		return nil, fmt.Errorf("cannot determine hostname: %w", err)
 	}
 
 	ip, err := util.GetIp()
 	if err != nil {
-		return nil, fmt.Errorf("cannot get ip address: %v", err)
+		return nil, fmt.Errorf("cannot get ip address: %w", err)
 	}
 
 	return &Config{
@@ -73,10 +73,10 @@ func NewConfig(name string, prefix string) (*Config, error) {
 func (c Config) IsResolved(ctx context.Context, entrypoint entry.EntrypointInterface) (bool, error) {
 	// Create directory to ensure it exists
 	if err := createDirectory(c.name); err != nil {
-		return false, fmt.Errorf("couldn't create directory: %v", err)
+		return false, fmt.Errorf("couldn't create directory: %w", err)
 	}
 	if err := c.createAndTemplateConfig(); err != nil {
-		return false, fmt.Errorf("cannot template %s: %v", c.name, err)
+		return false, fmt.Errorf("cannot template %s: %w", c.name, err)
 	}
 	return true, nil
 }
@@ -104,5 +104,5 @@ func createDirectory(file string) error {
 }
 
 func (c Config) String() string {
-	return fmt.Sprintf("Config %s", c.name)
+	return "Config " + c.name
 }

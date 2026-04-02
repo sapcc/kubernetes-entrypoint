@@ -22,9 +22,9 @@ type Socket struct {
 }
 
 func init() {
-	socketEnv := fmt.Sprintf("%sSOCKET", entry.DependencyPrefix)
+	socketEnv := entry.DependencyPrefix + "SOCKET"
 	if util.ContainsSeparator(socketEnv, "Socket") {
-		logger.Error.Printf(NamespaceNotSupported)
+		logger.Error.Print(NamespaceNotSupported)
 		os.Exit(1)
 	}
 	if socketDeps := env.SplitEnvToDeps(socketEnv); socketDeps != nil {
@@ -55,5 +55,5 @@ func (s Socket) IsResolved(ctx context.Context, entrypoint entry.EntrypointInter
 }
 
 func (s Socket) String() string {
-	return fmt.Sprintf("Socket %s", s.name)
+	return "Socket " + s.name
 }

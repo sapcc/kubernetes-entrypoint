@@ -37,7 +37,7 @@ var _ = Describe("Container", func() {
 		container := NewContainer(mocks.MockContainerName)
 
 		isResolved, err := container.IsResolved(context.TODO(), testEntrypoint)
-		Expect(isResolved).To(Equal(false))
+		Expect(isResolved).To(BeFalse())
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(Equal(PodNameNotSetError))
 	})
@@ -47,7 +47,7 @@ var _ = Describe("Container", func() {
 
 		isResolved, err := container.IsResolved(context.TODO(), testEntrypoint)
 
-		Expect(isResolved).To(Equal(true))
+		Expect(isResolved).To(BeTrue())
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -56,11 +56,11 @@ var _ = Describe("Container", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		container := NewContainer(mocks.PodNotPresent)
-		Expect(container).NotTo(Equal(nil))
+		Expect(container).NotTo(BeNil())
 
 		var isResolved bool
 		isResolved, err = container.IsResolved(context.TODO(), testEntrypoint)
-		Expect(isResolved).To(Equal(false))
-		Expect(err).To(BeNil())
+		Expect(isResolved).To(BeFalse())
+		Expect(err).ToNot(HaveOccurred())
 	})
 })

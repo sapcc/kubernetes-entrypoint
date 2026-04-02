@@ -25,7 +25,7 @@ type Daemonset struct {
 }
 
 func init() {
-	daemonsetEnv := fmt.Sprintf("%sDAEMONSET", entry.DependencyPrefix)
+	daemonsetEnv := entry.DependencyPrefix + "DAEMONSET"
 	daemonsetsDeps := env.SplitEnvToDeps(daemonsetEnv)
 	for _, dep := range daemonsetsDeps {
 		daemonset, err := NewDaemonset(dep.Name, dep.Namespace)
@@ -65,13 +65,12 @@ func (d Daemonset) IsResolved(ctx context.Context, entrypoint entry.EntrypointIn
 
 	myPod, err := entrypoint.Client().Pods(env.GetBaseNamespace()).Get(ctx, d.podName, metav1.GetOptions{})
 	if err != nil {
-		return false, fmt.Errorf("getting POD: %v failed : %v", myPodName, err)
+		return false, fmt.Errorf("getting POD: %v failed : %w", myPodName, err)
 	}
 
 	myHost := myPod.Status.HostIP
 
 	for _, pod := range daemonsetPods.Items {
-		pod := pod // pinning
 		if !isPodOnHost(&pod, myHost) {
 			continue
 		}
@@ -79,7 +78,6 @@ func (d Daemonset) IsResolved(ctx context.Context, entrypoint entry.EntrypointIn
 			return true, nil
 		}
 		return false, fmt.Errorf("pod %v of daemonset %s is not ready", pod.Name, d)
-
 	}
 	return true, nil
 }

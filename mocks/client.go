@@ -44,6 +44,7 @@ func (c Client) CustomResource(
 	ctx context.Context,
 	apiVersion, namespace, resource, name string,
 ) (*unstructured.Unstructured, error) {
+
 	return c.FakeCustomResource, c.Err
 }
 

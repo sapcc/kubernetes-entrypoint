@@ -2,6 +2,7 @@ package mocks
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	v1 "k8s.io/api/core/v1"
@@ -27,6 +28,7 @@ func (s sClient) Create(
 	service *v1.Service,
 	opts metav1.CreateOptions,
 ) (*v1.Service, error) {
+
 	return nil, fmt.Errorf("not implemented")
 }
 
@@ -35,6 +37,7 @@ func (s sClient) Update(
 	service *v1.Service,
 	opts metav1.UpdateOptions,
 ) (*v1.Service, error) {
+
 	return nil, fmt.Errorf("not implemented")
 }
 
@@ -43,6 +46,7 @@ func (s sClient) UpdateStatus(
 	service *v1.Service,
 	opts metav1.UpdateOptions,
 ) (*v1.Service, error) {
+
 	return nil, fmt.Errorf("not implemented")
 }
 
@@ -55,8 +59,9 @@ func (s sClient) Get(
 	name string,
 	opts metav1.GetOptions,
 ) (*v1.Service, error) {
+
 	if name == FailingServiceName {
-		return nil, fmt.Errorf(MockServiceError)
+		return nil, errors.New(MockServiceError)
 	}
 	return &v1.Service{
 		ObjectMeta: metav1.ObjectMeta{Name: name},
@@ -79,6 +84,7 @@ func (s sClient) Patch(
 	opts metav1.PatchOptions,
 	subresources ...string,
 ) (result *v1.Service, err error) {
+
 	return nil, fmt.Errorf("not implemented")
 }
 
@@ -87,6 +93,7 @@ func (s sClient) Apply(
 	service *corev1applyconfigurations.ServiceApplyConfiguration,
 	opts metav1.ApplyOptions,
 ) (result *v1.Service, err error) {
+
 	return nil, fmt.Errorf("not implemented")
 }
 
@@ -95,6 +102,7 @@ func (s sClient) ApplyStatus(
 	service *corev1applyconfigurations.ServiceApplyConfiguration,
 	opts metav1.ApplyOptions,
 ) (result *v1.Service, err error) {
+
 	return nil, fmt.Errorf("not implemented")
 }
 
@@ -102,6 +110,7 @@ func (s sClient) ProxyGet(
 	scheme, name, port, path string,
 	params map[string]string,
 ) restclient.ResponseWrapper {
+
 	return nil
 }
 
