@@ -50,3 +50,8 @@ fabric.properties
 
 # devcontainer
 .devcontainer/
+
+# Build output
+build/
+bin/
+

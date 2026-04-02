@@ -1,0 +1,60 @@
+# Configuration file for <https://github.com/sapcc/go-makefile-maker>
+
+binaries:
+  - name:        kubernetes-entrypoint
+    fromPackage: .
+    installTo:   bin/
+
+controllerGen:
+  enabled: false
+
+coverageTest:
+
+dockerfile:
+  enabled: true
+  runAsRoot: false
+
+golang:
+  autoupdateableDeps: ^github.com/(?:sapcc|sap-cloud-infrastructure|cobaltcore-dev)/
+  setGoModVersion: true
+
+golangciLint:
+  createConfig: true
+
+githubWorkflow:
+  ci:
+    enabled: true
+  global:
+    defaultBranch: main # only defined here so that the "Run go-makefile-maker" Action knows it
+  securityChecks:
+    enabled: true
+    queries: security-extended
+  pushContainerToGhcr:
+    enabled: true
+    platforms: "linux/amd64"
+    tagStrategy:
+      - edge
+      - latest
+      - semver
+      - sha
+  license:
+    enabled: true
+
+metadata:
+  url: https://github.com/sapcc/kubernetes-entrypoint
+
+nix:
+  writeEnvRc: false
+
+renovate:
+  enabled: true
+  assignees:
+    - notandy
+    - fwiesel
+    - mchristianl
+    - toanju
+    - anokfireball
+    - joker-at-work
+
+reuse:
+  enabled: false
