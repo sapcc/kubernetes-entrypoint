@@ -66,10 +66,10 @@ func (c Client) CustomResource(
 
 func NewClient() *Client {
 	return &Client{
-		PodInterface:          NewPClient(),
-		ServiceInterface:      NewSClient(),
-		DaemonSetInterface:    NewDSClient(),
+		PodInterface:           NewPClient(),
+		ServiceInterface:       NewSClient(),
+		DaemonSetInterface:     NewDSClient(),
 		EndpointSliceInterface: NewEClient(),
-		JobInterface:          NewJClient(),
+		JobInterface:           NewJClient(),
 	}
 }
