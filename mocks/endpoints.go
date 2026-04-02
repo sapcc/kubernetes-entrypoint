@@ -18,6 +18,7 @@ package mocks
 import (
 	"context"
 	"errors"
+	"strings"
 
 	discoveryv1 "k8s.io/api/discovery/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -86,10 +87,7 @@ func (e esClient) List(
 ) (*discoveryv1.EndpointSliceList, error) {
 
 	// Extract service name from label selector "kubernetes.io/service-name=<name>"
-	name := opts.LabelSelector
-	if len(name) > len("kubernetes.io/service-name=") {
-		name = name[len("kubernetes.io/service-name="):]
-	}
+	name := strings.TrimPrefix(opts.LabelSelector, "kubernetes.io/service-name=")
 
 	if name == FailingServiceName {
 		return nil, errors.New(MockEndpointError)
