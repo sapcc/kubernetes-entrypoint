@@ -38,6 +38,11 @@ func getNoOpCommands() []string {
 }
 
 func main() {
+	// Placeholder for version flag handling. Needed by smoke test in image build.
+	if len(os.Args) > 1 && os.Args[1] == "--version" {
+		os.Exit(0)
+	}
+
 	var comm []string
 	var entrypoint *entry.Entrypoint
 	var err error
