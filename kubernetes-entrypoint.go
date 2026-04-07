@@ -19,6 +19,7 @@ import (
 	"os"
 	"slices"
 
+	"github.com/sapcc/go-api-declarations/bininfo"
 	_ "opendev.org/airship/kubernetes-entrypoint/dependencies/config"
 	_ "opendev.org/airship/kubernetes-entrypoint/dependencies/container"
 	_ "opendev.org/airship/kubernetes-entrypoint/dependencies/customresource"
@@ -38,6 +39,7 @@ func getNoOpCommands() []string {
 }
 
 func main() {
+	bininfo.HandleVersionArgument()
 	var comm []string
 	var entrypoint *entry.Entrypoint
 	var err error
