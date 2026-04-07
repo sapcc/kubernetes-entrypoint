@@ -15,7 +15,7 @@
 package command
 
 import (
-	"fmt"
+	"errors"
 	"syscall"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -38,7 +38,7 @@ var _ = Describe("Execute", func() {
 
 	It("returns an error when syscall.Exec fails", func() {
 		execSyscall = func(_ string, _ []string, _ []string) error {
-			return fmt.Errorf("exec failed")
+			return errors.New("exec failed")
 		}
 		err := Execute([]string{"echo", "test"})
 		Expect(err).To(HaveOccurred())
