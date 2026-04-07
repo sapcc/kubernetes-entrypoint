@@ -55,3 +55,8 @@ fabric.properties
 build/
 bin/
 
+# Override global dotfile ignore rules (e.g. ".*") so that .github/ is
+# always tracked by this repository regardless of the user's global gitignore.
+!.github/
+!.github/**
+
