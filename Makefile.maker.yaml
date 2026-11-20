@@ -15,7 +15,9 @@ dockerfile:
   runAsRoot: false
 
 golang:
-  autoupdateableDeps: ^github.com/(?:sapcc|sap-cloud-infrastructure|cobaltcore-dev)/
+  autoupdateDependencies: 
+    enabled: true
+    matchModule: ^github.com/(?:sapcc|sap-cloud-infrastructure|cobaltcore-dev)/
   setGoModVersion: true
 
 golangciLint:
@@ -43,8 +45,8 @@ githubWorkflow:
 metadata:
   url: https://github.com/sapcc/kubernetes-entrypoint
 
-nix:
-  writeEnvRc: false
+envRc:
+  enabled: true
 
 renovate:
   enabled: true

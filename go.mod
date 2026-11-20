@@ -1,6 +1,6 @@
 module opendev.org/airship/kubernetes-entrypoint
 
-go 1.26
+go 1.27
 
 require (
 	github.com/onsi/ginkgo/v2 v2.28.1
