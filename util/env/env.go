@@ -48,6 +48,7 @@ type DeploymentDependency struct {
 	Name        string            `json:"name"`
 	Namespace   string            `json:"namespace"`
 	Annotations map[string]string `json:"annotations"`
+	Labels      map[string]string `json:"labels"`
 }
 
 type CustomResourceDependency struct {
@@ -195,6 +196,7 @@ func SplitDeploymentEnvToDeps(env, jsonEnv string) []DeploymentDependency {
 		Name        string             `json:"name"`
 		Namespace   json.RawMessage    `json:"namespace"`
 		Annotations map[string]*string `json:"annotations"`
+		Labels      map[string]*string `json:"labels"`
 	}
 	if err := json.Unmarshal([]byte(jsonEnvVal), &configured); err != nil {
 		logger.Warning.Printf("Invalid %s: expected an array of named Deployment dependencies: %v", jsonEnv, err)
@@ -228,12 +230,20 @@ func SplitDeploymentEnvToDeps(env, jsonEnv string) []DeploymentDependency {
 			}
 			annotations[key] = *value
 		}
+		labels := map[string]string{}
+		for key, value := range dep.Labels {
+			if value == nil {
+				logger.Warning.Printf("Invalid %s dependency %d: label %q must be a string, not null", jsonEnv, i+1, key)
+				return []DeploymentDependency{}
+			}
+			labels[key] = *value
+		}
 		if strings.TrimSpace(dep.Name) == "" {
 			logger.Warning.Printf("Invalid %s dependency %d: name is required", jsonEnv, i+1)
 			continue
 		}
 		deps = append(deps, DeploymentDependency{
-			Name: dep.Name, Namespace: namespace, Annotations: annotations,
+			Name: dep.Name, Namespace: namespace, Annotations: annotations, Labels: labels,
 		})
 	}
 	return deps

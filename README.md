@@ -62,7 +62,8 @@ A simple example of how to use downward API to get `POD_NAME` can be found [here
 
 ### Deployment
 
-Waits for a named `apps/v1` Deployment to converge to its current specification:
+Waits for a named `apps/v1` Deployment to converge to its current specification
+and for old Pods to finish terminating:
 
 ```sh
 DEPENDENCY_DEPLOYMENT=api,other-namespace:worker
@@ -72,18 +73,22 @@ An already-converged Deployment resolves immediately.
 Incomplete rollouts are retried with a `rollout incomplete` message; inspect the
 Deployment in Kubernetes to find out why it is not converging.
 
-To wait for a particular release, specify expected **top-level metadata annotations**:
+To wait for a particular release, specify expected **top-level metadata
+annotations and/or labels**:
 
 ```sh
 DEPENDENCY_DEPLOYMENT_JSON='[{"name":"api","namespace":"application","annotations":{"example.com/release-id":"my-release:42"}}]'
+# Labels can be used instead of, or together with, annotations:
+DEPENDENCY_DEPLOYMENT_JSON='[{"name":"api","labels":{"app.kubernetes.io/version":"v42"}}]'
 ```
 
-`name` is required. `namespace` is optional and defaults as above. `annotations` is
-an optional map of string keys to expected string values; missing or empty maps
-use current-state convergence only. Every expected key must exist and match exactly,
-including empty-string values; extra actual annotations are allowed. Pod-template
-annotations do not substitute for Deployment metadata annotations. Keys are freely
-configurable, and a different or newer release marker is never silently accepted.
+`name` is required. `namespace` is optional and defaults as above. `annotations`
+and `labels` are optional maps of string keys to expected string values; missing
+or empty maps use current-state convergence only. Every expected key in both maps
+must exist and match exactly, including empty-string values; extra actual metadata
+is allowed. Pod-template annotations and labels do not substitute for Deployment
+metadata. Labels are expectations on the named Deployment, not selectors. Keys are
+freely configurable, and a different or newer release marker is never silently accepted.
 When both variables are nonempty, JSON takes precedence with a warning. Invalid
 configuration is logged and may **skip dependencies rather than terminate the
 process**, following existing dependency registration behavior. Malformed JSON or

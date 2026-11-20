@@ -84,7 +84,7 @@ var _ = Describe("Deployment snapshot evaluation", func() {
 	DescribeTable("requires convergence of the currently observed specification",
 		func(change func(*appsv1.Deployment), resolved bool, diagnostic string) {
 			change(snapshot)
-			actual, err := evaluateDeployment(snapshot, nil)
+			actual, err := evaluateDeployment(snapshot, nil, nil)
 			Expect(actual).To(Equal(resolved))
 			if resolved {
 				Expect(err).NotTo(HaveOccurred())
@@ -149,7 +149,16 @@ var _ = Describe("Deployment snapshot evaluation", func() {
 			d.Spec.Replicas = nil
 			d.Status = appsv1.DeploymentStatus{ObservedGeneration: d.Generation}
 		}, false, "rollout incomplete"),
-		Entry("terminating Pods need not disappear", func(d *appsv1.Deployment) { d.Status.TerminatingReplicas = new(int32(2)) }, true, ""),
+		Entry("terminating Pods must disappear", func(d *appsv1.Deployment) { d.Status.TerminatingReplicas = new(int32(2)) }, false, "terminating Pods remain"),
+		Entry("zero terminating replicas", func(d *appsv1.Deployment) { d.Status.TerminatingReplicas = new(int32(0)) }, true, ""),
+		Entry("zero desired replicas still wait for terminating Pods", func(d *appsv1.Deployment) {
+			d.Spec.Replicas = new(int32(0))
+			d.Status = appsv1.DeploymentStatus{ObservedGeneration: d.Generation, TerminatingReplicas: new(int32(1))}
+		}, false, "terminating Pods remain"),
+		Entry("Recreate still waits for terminating Pods", func(d *appsv1.Deployment) {
+			d.Spec.Strategy.Type = appsv1.RecreateDeploymentStrategyType
+			d.Status.TerminatingReplicas = new(int32(1))
+		}, false, "terminating Pods remain"),
 		Entry("RollingUpdate uses the same predicate", func(d *appsv1.Deployment) { d.Spec.Strategy.Type = appsv1.RollingUpdateDeploymentStrategyType }, true, ""),
 		Entry("Recreate uses the same predicate", func(d *appsv1.Deployment) { d.Spec.Strategy.Type = appsv1.RecreateDeploymentStrategyType }, true, ""),
 		Entry("Recreate cannot bypass incomplete counts", func(d *appsv1.Deployment) {
@@ -162,7 +171,7 @@ var _ = Describe("Deployment snapshot evaluation", func() {
 		func(actual, template, expected map[string]string, resolved bool, diagnostic string) {
 			snapshot.Annotations = actual
 			snapshot.Spec.Template.Annotations = template
-			result, err := evaluateDeployment(snapshot, expected)
+			result, err := evaluateDeployment(snapshot, expected, nil)
 			Expect(result).To(Equal(resolved))
 			if resolved {
 				Expect(err).NotTo(HaveOccurred())
@@ -181,17 +190,58 @@ var _ = Describe("Deployment snapshot evaluation", func() {
 		Entry("a newer marker is not silently accepted", map[string]string{"release": "43"}, nil, map[string]string{"release": "42"}, false, `is "43", expected "42"`),
 	)
 
+	DescribeTable("matches every expected top-level label exactly",
+		func(actual, template, expected map[string]string, resolved bool, diagnostic string) {
+			snapshot.Labels = actual
+			snapshot.Spec.Template.Labels = template
+			result, err := evaluateDeployment(snapshot, nil, expected)
+			Expect(result).To(Equal(resolved))
+			if resolved {
+				Expect(err).NotTo(HaveOccurred())
+			} else {
+				Expect(err).To(MatchError(ContainSubstring(diagnostic)))
+			}
+		},
+		Entry("no expectations", nil, nil, nil, true, ""),
+		Entry("empty expectations", nil, nil, map[string]string{}, true, ""),
+		Entry("all matching, actual extras allowed", map[string]string{"a": "1", "b": "2", "extra": "3"}, nil, map[string]string{"a": "1", "b": "2"}, true, ""),
+		Entry("one match does not substitute for another", map[string]string{"a": "1", "b": "wrong"}, nil, map[string]string{"a": "1", "b": "2"}, false, `label "b" is "wrong", expected "2"`),
+		Entry("missing empty value", nil, nil, map[string]string{"empty": ""}, false, `label "empty" is missing, expected ""`),
+		Entry("present empty value", map[string]string{"empty": ""}, nil, map[string]string{"empty": ""}, true, ""),
+		Entry("Pod template cannot substitute for missing metadata", nil, map[string]string{"release": "42"}, map[string]string{"release": "42"}, false, "is missing"),
+		Entry("Pod template cannot substitute for wrong metadata", map[string]string{"release": "41"}, map[string]string{"release": "42"}, map[string]string{"release": "42"}, false, `is "41", expected "42"`),
+		Entry("a newer marker is not silently accepted", map[string]string{"release": "43"}, nil, map[string]string{"release": "42"}, false, `is "43", expected "42"`),
+	)
+
+	It("requires both annotations and labels when both are specified", func() {
+		annotations := map[string]string{"release": "42"}
+		labels := map[string]string{"version": "v42"}
+		snapshot.Annotations = annotations
+		snapshot.Labels = map[string]string{"version": "v41"}
+		resolved, err := evaluateDeployment(snapshot, annotations, labels)
+		Expect(resolved).To(BeFalse())
+		Expect(err).To(MatchError(ContainSubstring(`label "version"`)))
+		snapshot.Labels = labels
+		resolved, err = evaluateDeployment(snapshot, annotations, labels)
+		Expect(resolved).To(BeTrue())
+		Expect(err).NotTo(HaveOccurred())
+		snapshot.Annotations = nil
+		resolved, err = evaluateDeployment(snapshot, annotations, labels)
+		Expect(resolved).To(BeFalse())
+		Expect(err).To(MatchError(ContainSubstring(`annotation "release"`)))
+	})
+
 	It("reports only an incomplete rollout regardless of controller failures, then accepts recovery", func() {
 		snapshot.Status.UpdatedReplicas = 2
 		snapshot.Status.Conditions = []appsv1.DeploymentCondition{
 			{Type: appsv1.DeploymentProgressing, Status: corev1.ConditionFalse, Reason: "ProgressDeadlineExceeded", Message: "replicas did not progress"},
 			{Type: appsv1.DeploymentReplicaFailure, Status: corev1.ConditionTrue, Reason: "FailedCreate", Message: "quota exceeded"},
 		}
-		resolved, err := evaluateDeployment(snapshot, nil)
+		resolved, err := evaluateDeployment(snapshot, nil, nil)
 		Expect(resolved).To(BeFalse())
 		Expect(err).To(MatchError("rollout incomplete"))
 		snapshot.Status.UpdatedReplicas = 3
-		resolved, err = evaluateDeployment(snapshot, nil)
+		resolved, err = evaluateDeployment(snapshot, nil, nil)
 		Expect(resolved).To(BeTrue())
 		Expect(err).NotTo(HaveOccurred())
 	})
@@ -202,31 +252,34 @@ var _ = Describe("Deployment snapshot evaluation", func() {
 		expected := map[string]string{releaseAnnotation: "my-release:43"}
 		now := metav1.Now()
 		snapshot.DeletionTimestamp = &now
-		_, err := evaluateDeployment(snapshot, expected)
+		_, err := evaluateDeployment(snapshot, expected, nil)
 		Expect(err).To(MatchError(ContainSubstring("being deleted")))
 		snapshot.DeletionTimestamp = nil
-		_, err = evaluateDeployment(snapshot, expected)
+		_, err = evaluateDeployment(snapshot, expected, nil)
 		Expect(err).To(MatchError(ContainSubstring("pending target update")))
 		snapshot.Annotations = expected
-		_, err = evaluateDeployment(snapshot, expected)
+		_, err = evaluateDeployment(snapshot, expected, nil)
 		Expect(err).To(MatchError(ContainSubstring("has not been observed")))
 		snapshot.Status.ObservedGeneration = snapshot.Generation
-		_, err = evaluateDeployment(snapshot, expected)
+		_, err = evaluateDeployment(snapshot, expected, nil)
 		Expect(err).To(MatchError(ContainSubstring("paused")))
 	})
 })
 
 var _ = Describe("Deployment resolver", func() {
-	It("constructs a named dependency and owns its annotation expectations", func() {
+	It("constructs a named dependency and owns its metadata expectations", func() {
 		annotations := map[string]string{releaseAnnotation: "42"}
-		dep := NewDeployment("api", "application", annotations)
+		labels := map[string]string{"version": "v42"}
+		dep := NewDeployment("api", "application", annotations, labels)
 		Expect(dep.name).To(Equal("api"))
 		Expect(dep.namespace).To(Equal("application"))
 		Expect(dep.String()).To(Equal("Deployment api in namespace application"))
 		annotations[releaseAnnotation] = "43"
 		Expect(dep.annotations).To(Equal(map[string]string{releaseAnnotation: "42"}))
-		Expect(NewDeployment("", "application", nil)).To(BeNil())
-		Expect(NewDeployment(" ", "application", nil)).To(BeNil())
+		labels["version"] = "v43"
+		Expect(dep.labels).To(Equal(map[string]string{"version": "v42"}))
+		Expect(NewDeployment("", "application", nil, nil)).To(BeNil())
+		Expect(NewDeployment(" ", "application", nil, nil)).To(BeNil())
 	})
 
 	DescribeTable("registers both configuration modes using the existing resolver contract",
@@ -243,8 +296,12 @@ var _ = Describe("Deployment resolver", func() {
 		},
 		Entry("plain", "api,other:worker", "", []Deployment{{name: "api", namespace: "application"}, {name: "worker", namespace: "other"}}),
 		Entry("JSON precedence with annotations", "ignored", `[{"name":"api","annotations":{"release":"42"}},{"name":"worker","namespace":"other"}]`, []Deployment{
-			{name: "api", namespace: "application", annotations: map[string]string{"release": "42"}},
-			{name: "worker", namespace: "other", annotations: map[string]string{}},
+			{name: "api", namespace: "application", annotations: map[string]string{"release": "42"}, labels: map[string]string{}},
+			{name: "worker", namespace: "other", annotations: map[string]string{}, labels: map[string]string{}},
+		}),
+		Entry("JSON labels and annotations", "", `[{"name":"api","labels":{"version":"v42"},"annotations":{"release":"42"}},{"name":"worker","namespace":"other","labels":{"app":"worker"}}]`, []Deployment{
+			{name: "api", namespace: "application", annotations: map[string]string{"release": "42"}, labels: map[string]string{"version": "v42"}},
+			{name: "worker", namespace: "other", annotations: map[string]string{}, labels: map[string]string{"app": "worker"}},
 		}),
 		Entry("unset", "", "", nil),
 		Entry("invalid names skipped", "", `[{"annotations":{"release":"42"}}]`, nil),
@@ -268,10 +325,74 @@ var _ = Describe("Deployment resolver", func() {
 			return mockClient.Deployments(namespace)
 		}}
 		ep := deploymentEntrypoint{kubeClient: kubeClient}
-		resolved, err := NewDeployment("api", "application", nil).IsResolved(ctx, ep)
+		resolved, err := NewDeployment("api", "application", nil, nil).IsResolved(ctx, ep)
 		Expect(resolved).To(BeTrue())
 		Expect(err).NotTo(HaveOccurred())
 		Expect(calls).To(Equal(1))
+	})
+
+	DescribeTable("always waits for terminating replicas using only Deployment status",
+		func(strategy appsv1.DeploymentStrategyType, desired int32) {
+			snapshot := completeDeployment()
+			snapshot.Spec.Strategy.Type = strategy
+			snapshot.Spec.Replicas = new(desired)
+			snapshot.Status.UpdatedReplicas = desired
+			snapshot.Status.Replicas = desired
+			snapshot.Status.AvailableReplicas = desired
+			calls := 0
+			ctx := context.Background()
+			// Other client methods are deliberately unavailable: only Get is needed.
+			kubeClient := namespacedDeploymentClient{deployments: func(namespace string) appsclient.DeploymentInterface {
+				Expect(namespace).To(Equal("application"))
+				return deploymentAPI{get: func(actual context.Context, name string, options metav1.GetOptions) (*appsv1.Deployment, error) {
+					Expect(actual).To(BeIdenticalTo(ctx))
+					Expect(name).To(Equal("api"))
+					Expect(options).To(Equal(metav1.GetOptions{}))
+					calls++
+					return snapshot.DeepCopy(), nil
+				}}
+			}}
+			dep := NewDeployment("api", "application", nil, nil)
+			for _, terminating := range []int32{2, 1, 0} {
+				snapshot.Status.TerminatingReplicas = new(terminating)
+				resolved, err := dep.IsResolved(ctx, deploymentEntrypoint{kubeClient: kubeClient})
+				Expect(resolved).To(Equal(terminating == 0))
+				if terminating == 0 {
+					Expect(err).NotTo(HaveOccurred())
+				} else {
+					Expect(err).To(MatchError(ContainSubstring("terminating Pods remain")))
+				}
+			}
+			Expect(calls).To(Equal(3))
+		},
+		Entry("RollingUpdate", appsv1.RollingUpdateDeploymentStrategyType, int32(3)),
+		Entry("Recreate", appsv1.RecreateDeploymentStrategyType, int32(3)),
+		Entry("scaled to zero", appsv1.RollingUpdateDeploymentStrategyType, int32(0)),
+	)
+
+	It("waits for expected labels and annotations before awaiting Pod termination", func() {
+		snapshot := completeDeployment()
+		annotations := map[string]string{releaseAnnotation: "my-release:42"}
+		labels := map[string]string{"version": "v42"}
+		snapshot.Labels = map[string]string{"version": "v41"}
+		snapshot.Status.TerminatingReplicas = new(int32(1))
+		mockClient := mocks.NewClient()
+		mockClient.DeploymentInterface = deploymentAPI{get: func(context.Context, string, metav1.GetOptions) (*appsv1.Deployment, error) {
+			return snapshot.DeepCopy(), nil
+		}}
+		dep := NewDeployment("api", "application", annotations, labels)
+		ep := deploymentEntrypoint{kubeClient: mockClient}
+		resolved, err := dep.IsResolved(context.Background(), ep)
+		Expect(resolved).To(BeFalse())
+		Expect(err).To(MatchError(ContainSubstring(`label "version" is "v41", expected "v42"`)))
+		snapshot.Labels = labels
+		resolved, err = dep.IsResolved(context.Background(), ep)
+		Expect(resolved).To(BeFalse())
+		Expect(err).To(MatchError(ContainSubstring("terminating Pods remain")))
+		snapshot.Status.TerminatingReplicas = new(int32(0))
+		resolved, err = dep.IsResolved(context.Background(), ep)
+		Expect(resolved).To(BeTrue())
+		Expect(err).NotTo(HaveOccurred())
 	})
 
 	DescribeTable("keeps missing resources and API failures retryable and preserves their cause",
@@ -281,7 +402,7 @@ var _ = Describe("Deployment resolver", func() {
 				return nil, apiError
 			}}
 			ep := deploymentEntrypoint{kubeClient: mockClient}
-			dep := NewDeployment("api", "application", nil)
+			dep := NewDeployment("api", "application", nil, nil)
 			resolved, err := dep.IsResolved(context.Background(), ep)
 			Expect(resolved).To(BeFalse())
 			Expect(err).To(MatchError(ContainSubstring("getting Deployment api in namespace application")))
@@ -300,7 +421,7 @@ var _ = Describe("Deployment resolver", func() {
 	)
 
 	It("does not accept a missing snapshot even if a client returns no error", func() {
-		resolved, err := evaluateDeployment(nil, nil)
+		resolved, err := evaluateDeployment(nil, nil, nil)
 		Expect(resolved).To(BeFalse())
 		Expect(err).To(MatchError(ContainSubstring("not returned by the API")))
 	})
@@ -342,7 +463,7 @@ var _ = Describe("Deployment resolver", func() {
 				return snapshot, nil
 			}}
 			ep := deploymentEntrypoint{kubeClient: mockClient}
-			dep := NewDeployment("api", "application", map[string]string{releaseAnnotation: "my-release:42"})
+			dep := NewDeployment("api", "application", map[string]string{releaseAnnotation: "my-release:42"}, nil)
 			for i, want := range expected {
 				resolved, err := dep.IsResolved(context.Background(), ep)
 				Expect(resolved).To(Equal(want))
@@ -382,7 +503,7 @@ var _ = Describe("Deployment resolver", func() {
 			calls++
 			return snapshot, nil
 		}}
-		dep := NewDeployment("api", "application", map[string]string{releaseAnnotation: "my-release:42"})
+		dep := NewDeployment("api", "application", map[string]string{releaseAnnotation: "my-release:42"}, nil)
 		for _, diagnostic := range diagnostics {
 			resolved, err := dep.IsResolved(context.Background(), deploymentEntrypoint{kubeClient: mockClient})
 			Expect(resolved).To(BeFalse())

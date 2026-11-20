@@ -33,6 +33,7 @@ type Deployment struct {
 	name        string
 	namespace   string
 	annotations map[string]string
+	labels      map[string]string
 }
 
 func init() {
@@ -42,18 +43,18 @@ func init() {
 func registerDeployments(register func(entry.Resolver)) {
 	deploymentEnv := entry.DependencyPrefix + "DEPLOYMENT"
 	for _, dep := range env.SplitDeploymentEnvToDeps(deploymentEnv, deploymentEnv+entry.JsonSuffix) {
-		if deployment := NewDeployment(dep.Name, dep.Namespace, dep.Annotations); deployment != nil {
+		if deployment := NewDeployment(dep.Name, dep.Namespace, dep.Annotations, dep.Labels); deployment != nil {
 			register(*deployment)
 		}
 	}
 }
 
-func NewDeployment(name, namespace string, annotations map[string]string) *Deployment {
+func NewDeployment(name, namespace string, annotations, labels map[string]string) *Deployment {
 	if strings.TrimSpace(name) == "" {
 		logger.Warning.Printf("Cannot create Deployment dependency: name is required")
 		return nil
 	}
-	return &Deployment{name: name, namespace: namespace, annotations: maps.Clone(annotations)}
+	return &Deployment{name: name, namespace: namespace, annotations: maps.Clone(annotations), labels: maps.Clone(labels)}
 }
 
 func (d Deployment) String() string {
@@ -65,7 +66,7 @@ func (d Deployment) IsResolved(ctx context.Context, entrypoint entry.EntrypointI
 	if err != nil {
 		return false, fmt.Errorf("getting %s: %w", d, err)
 	}
-	resolved, err := evaluateDeployment(snapshot, d.annotations)
+	resolved, err := evaluateDeployment(snapshot, d.annotations, d.labels)
 	if err != nil {
 		return false, fmt.Errorf("%s: %w", d, err)
 	}
@@ -73,22 +74,20 @@ func (d Deployment) IsResolved(ctx context.Context, entrypoint entry.EntrypointI
 }
 
 // evaluateDeployment uses only this snapshot: stale success cannot acknowledge
-// a new specification. Completion depends on replica counts, not conditions.
-func evaluateDeployment(deployment *appsv1.Deployment, annotations map[string]string) (bool, error) {
+// a new specification. Completion requires replica convergence and no terminating
+// replicas, rather than relying on conditions.
+func evaluateDeployment(deployment *appsv1.Deployment, annotations, labels map[string]string) (bool, error) {
 	if deployment == nil {
 		return false, errors.New("Deployment was not returned by the API")
 	}
 	if deployment.DeletionTimestamp != nil {
 		return false, errors.New("Deployment is being deleted")
 	}
-	for key, expected := range annotations {
-		actual, present := deployment.Annotations[key]
-		if !present {
-			return false, fmt.Errorf("pending target update: metadata annotation %q is missing, expected %q", key, expected)
-		}
-		if actual != expected {
-			return false, fmt.Errorf("pending target update: metadata annotation %q is %q, expected %q", key, actual, expected)
-		}
+	if err := matchMetadata("annotation", deployment.Annotations, annotations); err != nil {
+		return false, err
+	}
+	if err := matchMetadata("label", deployment.Labels, labels); err != nil {
+		return false, err
 	}
 	status := deployment.Status
 	if status.ObservedGeneration < deployment.Generation {
@@ -101,9 +100,25 @@ func evaluateDeployment(deployment *appsv1.Deployment, annotations map[string]st
 	if deployment.Spec.Replicas != nil {
 		desired = *deployment.Spec.Replicas
 	}
+	if status.TerminatingReplicas != nil && *status.TerminatingReplicas != 0 {
+		return false, errors.New("rollout incomplete: terminating Pods remain")
+	}
 	if status.UpdatedReplicas == desired && status.Replicas == desired && status.AvailableReplicas == desired {
 		return true, nil
 	}
 
 	return false, errors.New("rollout incomplete")
+}
+
+func matchMetadata(kind string, actual, expected map[string]string) error {
+	for key, value := range expected {
+		got, present := actual[key]
+		if !present {
+			return fmt.Errorf("pending target update: metadata %s %q is missing, expected %q", kind, key, value)
+		}
+		if got != value {
+			return fmt.Errorf("pending target update: metadata %s %q is %q, expected %q", kind, key, got, value)
+		}
+	}
+	return nil
 }
