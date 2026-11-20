@@ -78,7 +78,7 @@ func (s sClient) Get(
 		return nil, errors.New(MockServiceError)
 	}
 	return &v1.Service{
-		ObjectMeta: metav1.ObjectMeta{Name: name},
+		Name: name,
 	}, nil
 }
 

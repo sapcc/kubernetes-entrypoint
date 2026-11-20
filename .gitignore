@@ -51,6 +51,9 @@ fabric.properties
 # devcontainer
 .devcontainer/
 
+# direnv
+.direnv
+
 # Build output
 build/
 bin/

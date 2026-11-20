@@ -93,7 +93,7 @@ func (p pClient) Get(ctx context.Context, name string, opts metav1.GetOptions) (
 	}
 
 	return &v1.Pod{
-		ObjectMeta: metav1.ObjectMeta{Name: name},
+		Name: name,
 		Status: v1.PodStatus{
 			ContainerStatuses: []v1.ContainerStatus{
 				{
@@ -240,7 +240,7 @@ func NewPod(ready bool, hostIP string) v1.Pod {
 	}
 
 	return v1.Pod{
-		ObjectMeta: metav1.ObjectMeta{Name: PodEnvVariableValue},
+		Name: PodEnvVariableValue,
 		Status: v1.PodStatus{
 			HostIP: hostIP,
 			Conditions: []v1.PodCondition{

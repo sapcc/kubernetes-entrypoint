@@ -106,8 +106,8 @@ func (e esClient) List(
 	sliceList := &discoveryv1.EndpointSliceList{
 		Items: []discoveryv1.EndpointSlice{
 			{
-				ObjectMeta: metav1.ObjectMeta{Name: name},
-				Endpoints:  endpoints,
+				Name:      name,
+				Endpoints: endpoints,
 			},
 		},
 	}

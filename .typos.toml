@@ -4,9 +4,9 @@
 
 [default.extend-words]
 
+
 [files]
 extend-exclude = [
   "go.mod",
   "zuul.d/",
-  "image_tags.py",
 ]

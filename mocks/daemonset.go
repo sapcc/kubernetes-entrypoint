@@ -99,7 +99,7 @@ func (d dClient) Get(
 	}
 
 	ds := &v1.DaemonSet{
-		ObjectMeta: metav1.ObjectMeta{Name: name},
+		Name: name,
 		Spec: v1.DaemonSetSpec{
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{"name": matchLabelName},
