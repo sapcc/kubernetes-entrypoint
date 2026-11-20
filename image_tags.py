@@ -23,7 +23,7 @@ LOG = logging.getLogger(__name__)
 LOG_FORMAT = '%(asctime)s %(levelname)-8s %(name)s:%(filename)s:%(lineno)3d:%(funcName)s %(message)s'  # noqa
 
 
-class TagGenExeception(Exception):
+class TagGenException(Exception):
     pass
 
 
@@ -99,7 +99,7 @@ def _valid_dg(config, dynamic_tag, context_name=None):
         if config.get('context', {}).get(context_name):
             return True
         else:
-            raise TagGenExeception('Dynamic tag "%s" requested, but "%s"'
+            raise TagGenException('Dynamic tag "%s" requested, but "%s"'
                                    ' not found in context' % (dynamic_tag,
                                                               context_name))
     else:
@@ -118,7 +118,7 @@ if __name__ == '__main__':
     logging.basicConfig(format=LOG_FORMAT, level=logging.WARNING)
     try:
         main()
-    except TagGenExeception:
+    except TagGenException:
         LOG.exception('Failed to generate tags')
         sys.exit(1)
     except Exception:

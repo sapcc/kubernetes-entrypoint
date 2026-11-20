@@ -23,6 +23,11 @@ golang:
 golangciLint:
   createConfig: true
 
+typos:
+  enabled: true
+  extendExcludes:
+    - zuul.d/
+
 githubWorkflow:
   ci:
     enabled: true
